@@ -1,215 +1,248 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Usuarios | Admin</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
-    <style>
-        :root{
-            --clr-primary:#7380ec;--clr-danger:#ff7782;--clr-success:#41f1b6;--clr-white:#fff;
-            --clr-info-dark:#7d8da1;--clr-info-light:#ccd5e5;--clr-dark:#363949;--bg:#f6f6f9;
-            --radius:24px;--shadow:0 2rem 3rem rgba(132,139,200,.18);
-            --grid-cols: 260px 2.2fr 220px 1.3fr 260px;
-            --v-sep:#d7ddea;--row-sep:#dee4f1;--head-sep:#d3d9e6;--card-border:#cfd7e6;
-        }
-        *{box-sizing:border-box}
-        body{margin:0;font-family:ui-sans-serif,system-ui,Segoe UI,Roboto,Ubuntu,Arial;background:var(--bg);color:var(--clr-dark)}
-        a{color:inherit;text-decoration:none}
-        .wrap{max-width:1200px;margin:32px auto;padding:0 16px}
+@extends('layouts.admin')
+@section('title','Usuarios | Admin')
 
-        .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
-        .btn{display:inline-flex;align-items:center;gap:.45rem;border:1px solid transparent;border-radius:12px;
-             padding:.65rem 1rem;font-weight:700;cursor:pointer;transition:.15s ease;white-space:nowrap}
-        .btn:focus{outline:3px solid rgba(115,128,236,.25);outline-offset:2px}
-        .btn-back{background:var(--clr-white);border-color:#e0e6f2;color:#424b5f}
-        .btn-back:hover{background:#eef2ff}
-        .btn-create{background:var(--clr-primary);color:#fff}
-        .btn-create:hover{filter:brightness(.95)}
-        .badge{background:#eef2ff;color:#4f46e5;border:1px solid #dbe2ff;border-radius:999px;padding:.25rem .7rem;font-weight:700}
+@push('head')
+<style>
+  /* ======== LAYOUT DEL CONTENIDO ======== */
+  .users-wrap{
+    width:100%;
+    margin: 96px clamp(16px,2vw,24px) 28px; /* lo bajé ~1cm aprox */
+  }
 
-        .alert{padding:.85rem 1rem;border-radius:12px;margin:12px 0;border:1px solid}
-        .alert-success{background:#ecfdf5;border-color:#a7f3d0;color:#065f46}
-        .alert-error{background:#fff1f2;border-color:#fecdd3;color:#9f1239}
+  /* ======== CARD ======== */
+  .card{
+    width:100%;
+    background:#fff;
+    border:1px solid #d8e0ef;
+    border-radius:20px;
+    box-shadow:0 18px 32px rgba(15,23,42,.08);
+    overflow:hidden;
+  }
+  .card-header{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 18px;
+    border-bottom:1px solid #e6ecf7;
+    background:linear-gradient(180deg,#fafbff 0%, #ffffff 70%);
+  }
+  .card-header .title{ color:#64748b; font-weight:600 }
+  .total-badge{
+    background:#eef2ff; color:#4f46e5; border:1px solid #dbe2ff;
+    border-radius:999px; padding:.25rem .6rem; font-weight:700
+  }
 
-        .card{background:var(--clr-white);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;border:1.5px solid var(--card-border)}
-        .muted{color:var(--clr-info-dark);font-size:.95rem}
+  /* ======== TABLA: LÍNEAS RECTA + ANCHO REAL ======== */
+  table.users{
+    width:100%;
+    border-collapse:collapse;    /* un solo borde: recto y limpio */
+    table-layout:fixed;          /* respeta el colgroup */
+    background:#fff;
+  }
+  /* proporciones suman 100% */
+  table.users col.col-nombre{ width: 18%; }
+  table.users col.col-correo{ width: 32%; }
+  table.users col.col-rol{    width: 12%; }
+  table.users col.col-esps{   width: 28%; }
+  table.users col.col-acts{   width: 10%; }
 
-        table{width:100%;border-collapse:separate;border-spacing:0}
-        thead tr.headergrid{display:grid;grid-template-columns:var(--grid-cols);gap:0}
-        thead th{
-            background:#fafbff;border-bottom:1.5px solid var(--head-sep);
-            text-align:left;padding:14px 12px;font-weight:800;color:#374151;
-            border-right:1.5px solid var(--v-sep);
-        }
-        thead th:last-child{border-right:none}
-        thead th.tar{text-align:center}
+  table.users thead th{
+    background:#fafbff;
+    color:#0f172a;
+    font-weight:800;
+    font-size:.95rem;
+    text-align:left;
+    padding:14px 12px;
+    border:1.5px solid #d6dfef; /* MISMO borde en th/td → separadores perfectos */
+    white-space:nowrap;
+  }
 
-        tbody td{padding:0;border-bottom:1.5px solid var(--row-sep)}
-        tbody tr:hover{background:#f9fbff}
+  table.users tbody td{
+    padding:12px;
+    border:1.5px solid #d6dfef; /* MISMO borde */
+    vertical-align:top;
+    background:#fff;
+  }
 
-        .rowgrid{display:grid;grid-template-columns:var(--grid-cols);gap:0;align-items:stretch}
-        .rowgrid > div{border-right:1.5px solid var(--v-sep);display:flex}
-        .rowgrid > div:last-child{border-right:none}
+  /* Columna acciones centrada y con ancho mínimo suficiente */
+  table.users thead th:nth-last-child(1),
+  table.users tbody td:nth-last-child(1){
+    text-align:center;
+    min-width:160px;
+  }
 
-        .cell{display:flex;flex-direction:column;gap:6px;padding:12px;width:100%}
-        .help{font-size:.82rem;color:#7a859f}
+  /* ======== CONTROLES UNIFORMES ======== */
+  .input,.select{
+    width:100%; height:44px;
+    border-radius:12px;
+    background:#fbfcfe; color:#0f172a; padding:0 .85rem;
+    border:1.6px solid #ccd5e5;
+    line-height:44px;
+  }
+  .input:focus,.select:focus{
+    outline:none; border-color:#7380ec; box-shadow:0 0 0 4px rgba(115,128,236,.18);
+  }
 
-        .input,.select{
-            width:100%;height:44px;background:#fbfcfe;border:1.6px solid var(--clr-info-light);
-            border-radius:12px;padding:0 .85rem;color:#111827;transition:border .15s, box-shadow .15s;appearance:none
-        }
-        .input:focus,.select:focus{border-color:#7380ec;box-shadow:0 0 0 4px rgba(115,128,236,.18);outline:none}
+  .chip{
+    display:inline-block;
+    margin:0 8px 8px 0;
+    background:#eef2ff; border:1px solid #d5dcff;
+    color:#3949ab; border-radius:999px; padding:.12rem .55rem;
+    font-size:.8rem; font-weight:600;
+    white-space:nowrap;
+  }
+  .help{ font-size:.82rem; color:#7a859f; margin-top:6px }
 
-        .chips{display:flex;flex-wrap:wrap;gap:.4rem;align-items:center}
-        .chip{background:#eef2ff;border:1.5px solid #d5dcff;color:#3949ab;border-radius:999px;padding:.2rem .6rem;font-size:.82rem;font-weight:600}
+  .actions{ display:flex; justify-content:center; align-items:center; gap:.5rem }
+  .btn{ display:inline-flex; gap:.45rem; align-items:center; border:0;
+        border-radius:12px; padding:.65rem 1rem; font-weight:700; cursor:pointer }
+  .btn-primary{ background:#7380ec; color:#fff }
+  .btn-outline{ background:#fff; border:1.5px solid #e0e6f2; color:#424b5f }
 
-        .actions{display:flex;gap:.55rem;justify-content:center;align-items:center;white-space:nowrap}
-        .btn-save{background:var(--clr-success);color:#053d2d;border:1.5px solid #bdeee0}
-        .btn-save:hover{filter:brightness(.95)}
-        .btn-del{background:#fff;border:1.5px solid #ffc8d0;color:#b4232c}
-        .btn-del:hover{background:#fff1f3}
+  .alert{ padding:.85rem 1rem; border-radius:12px; margin:12px 16px 0; border:1px solid }
+  .alert-success{ background:#ecfdf5; border-color:#a7f3d0; color:#065f46 }
+  .alert-error{ background:#fff1f2; border-color:#fecdd3; color:#9f1239 }
 
-        @media (max-width:1120px){
-            :root{ --grid-cols: 1fr }
-            thead tr.headergrid{display:none}
-            .rowgrid{grid-template-columns:1fr}
-            .rowgrid > div{border-right:none;border-top:1.5px solid var(--v-sep)}
-            .rowgrid > div:first-child{border-top:none}
-            .actions{justify-content:flex-start}
-        }
-    </style>
-</head>
-<body>
-<div class="wrap">
+  .card-footer{
+    display:flex; justify-content:flex-end; gap:.5rem; align-items:center;
+    color:#7d8da1; padding:10px 16px 16px;
+  }
 
-    <div class="topbar">
-        <div style="display:flex;gap:.7rem;align-items:center">
-            <a href="{{ route('admin.dashboard') }}" class="btn btn-back">
-                <span class="material-symbols-outlined">arrow_back</span> Volver al panel
-            </a>
-            <span class="badge">Total: {{ $users->total() }}</span>
-        </div>
-        <a class="btn btn-create" href="{{ route('admin.doctores.crear') }}">
-            <span class="material-symbols-outlined">medical_services</span> Crear doctor
-        </a>
+  /* ======== HOVER / LEGIBILIDAD ======== */
+  tbody tr:hover td{ background:#fbfdff }
+
+  /* ======== RESPONSIVE ======== */
+  @media (max-width: 980px){
+    table.users col.col-esps{ width: 24% }
+    table.users col.col-correo{ width: 36% }
+  }
+  @media (max-width: 780px){
+    .card-header{ flex-direction:column; gap:.5rem; align-items:flex-start }
+    thead{ display:none }
+    table.users, tbody, tr, td{ display:block; width:100% }
+    tbody tr{ border-top:1px solid #e6ecf7 }
+    tbody td{ border-left:0; border-right:0 }
+    tbody td::before{
+      content: attr(data-label);
+      display:block; font-weight:700; color:#334155; margin-bottom:6px
+    }
+    table.users col{ width:auto }
+    .actions{ justify-content:flex-start }
+  }
+
+  /* Evita scroll horizontal accidental */
+  html,body{ overflow-x:hidden; }
+</style>
+@endpush
+
+@section('main')
+<div class="users-wrap">
+
+  <div class="card">
+    <div class="card-header">
+      <div class="title">Edita los datos y pulsa <b>Guardar</b>.</div>
+      <span class="total-badge">Total: {{ $users->total() }}</span>
     </div>
 
     @if ($errors->any())
-        <div class="alert alert-error">
-            @foreach ($errors->all() as $e)
-                <div>{{ $e }}</div>
-            @endforeach
-        </div>
+      <div class="alert alert-error">
+        @foreach ($errors->all() as $e)<div>{{ $e }}</div>@endforeach
+      </div>
     @endif
     @if (session('success'))
-        <div class="alert alert-success">{{ session('success') }}</div>
+      <div class="alert alert-success">{{ session('success') }}</div>
     @endif
 
-    <div class="card">
-        <div class="muted" style="margin-bottom:12px">Edita los datos y pulsa <b>Guardar</b>.</div>
+    <table class="users">
+      <colgroup>
+        <col class="col-nombre">
+        <col class="col-correo">
+        <col class="col-rol">
+        <col class="col-esps">
+        <col class="col-acts">
+      </colgroup>
 
-        <div style="overflow:auto">
-            <table>
-                <thead>
-                <tr class="headergrid">
-                    <th>Nombre</th>
-                    <th>Correo</th>
-                    <th>Rol</th>
-                    <th>Especialidades</th>
-                    <th class="tar">Acciones</th>
-                </tr>
-                </thead>
-                <tbody>
-                @foreach($users as $u)
-                    @php
-                        $roleIdActual = optional($u->roles->first())->id;
-                        $esAdmin = $u->roles->contains(fn($rr)=>$rr->name==='administrador');
-                        $espNombres = ($u->especialidades ?? collect())->pluck('nombre')->all();
-                    @endphp
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Correo</th>
+          <th>Rol</th>
+          <th>Especialidades</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
 
-                    <form id="update-{{ $u->id }}" action="{{ route('admin.usuarios.update', $u) }}" method="POST">@csrf @method('PUT')</form>
-                    @unless($esAdmin)
-                        <form id="delete-{{ $u->id }}" action="{{ route('admin.usuarios.destroy', $u) }}" method="POST">@csrf @method('DELETE')</form>
-                    @endunless
+      <tbody>
+      @foreach($users as $u)
+        @php
+          $roleIdActual = optional($u->roles->first())->id;
+          $esAdmin = $u->roles->contains(fn($rr)=>$rr->name==='administrador');
+          $espNombres = ($u->especialidades ?? collect())->pluck('nombre')->all();
+        @endphp
 
-                    <tr>
-                        <td colspan="5">
-                            <div class="rowgrid">
-                                <div>
-                                    <div class="cell">
-                                        <input class="input" form="update-{{ $u->id }}" type="text" name="name"
-                                               value="{{ old('name_'.$u->id, $u->name) }}" required>
-                                        <div class="help">ID: {{ $u->id }}</div>
-                                    </div>
-                                </div>
+        <form id="update-{{ $u->id }}" action="{{ route('admin.usuarios.update', $u) }}" method="POST">@csrf @method('PUT')</form>
+        @unless($esAdmin)
+          <form id="delete-{{ $u->id }}" action="{{ route('admin.usuarios.destroy', $u) }}" method="POST">@csrf @method('DELETE')</form>
+        @endunless
 
-                                <div>
-                                    <div class="cell">
-                                        <input class="input" form="update-{{ $u->id }}" type="email" name="email"
-                                               value="{{ old('email_'.$u->id, $u->email) }}" required>
-                                    </div>
-                                </div>
+        <tr>
+          <td data-label="Nombre">
+            <input class="input" form="update-{{ $u->id }}" type="text" name="name"
+                   value="{{ old('name_'.$u->id, $u->name) }}" required>
+            <div class="help">ID: {{ $u->id }}</div>
+          </td>
 
-                                <div>
-                                    <div class="cell">
-                                        @if($esAdmin)
-                                            <span class="chip" title="No editable para administradores">Administrador</span>
-                                            <input type="hidden" form="update-{{ $u->id }}" name="role_id" value="{{ $roleIdActual }}">
-                                        @else
-                                            <select class="select" form="update-{{ $u->id }}" name="role_id" required>
-                                                @foreach($roles->whereNotIn('name',['administrador']) as $r)
-                                                    <option value="{{ $r->id }}" @selected($roleIdActual===$r->id)>{{ ucfirst($r->name) }}</option>
-                                                @endforeach
-                                            </select>
-                                        @endif
-                                    </div>
-                                </div>
+          <td data-label="Correo">
+            <input class="input" form="update-{{ $u->id }}" type="email" name="email"
+                   value="{{ old('email_'.$u->id, $u->email) }}" required>
+          </td>
 
-                                <div>
-                                    <div class="cell">
-                                        @if(count($espNombres))
-                                            <div class="chips">
-                                                @foreach($espNombres as $n)
-                                                    <span class="chip">{{ $n }}</span>
-                                                @endforeach
-                                            </div>
-                                        @else
-                                            <div class="help">—</div>
-                                        @endif
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <div class="cell" style="padding:12px">
-                                        <div class="actions">
-                                            <button form="update-{{ $u->id }}" type="submit" class="btn btn-save">
-                                                <span class="material-symbols-outlined">save</span> Guardar
-                                            </button>
-                                            @unless($esAdmin)
-                                                <button form="delete-{{ $u->id }}" type="submit" class="btn btn-del"
-                                                        onclick="return confirm('¿Eliminar usuario {{ $u->name }}?');">
-                                                    <span class="material-symbols-outlined">delete</span> Eliminar
-                                                </button>
-                                            @endunless
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </td>
-                    </tr>
+          <td data-label="Rol">
+            @if($esAdmin)
+              <span class="chip" title="No editable para administradores">Administrador</span>
+              <input type="hidden" form="update-{{ $u->id }}" name="role_id" value="{{ $roleIdActual }}">
+            @else
+              <select class="select" form="update-{{ $u->id }}" name="role_id" required>
+                @foreach($roles->whereNotIn('name',['administrador']) as $r)
+                  <option value="{{ $r->id }}" @selected($roleIdActual===$r->id)>{{ ucfirst($r->name) }}</option>
                 @endforeach
-                </tbody>
-            </table>
-        </div>
-
-        <div style="margin-top:12px;display:flex;justify-content:flex-end;gap:.5rem;align-items:center">
-            @if ($users->hasPages())
-                <div class="muted">Página {{ $users->currentPage() }} de {{ $users->lastPage() }}</div>
+              </select>
             @endif
-            {!! $users->withQueryString()->links() !!}
-        </div>
+          </td>
+
+          <td data-label="Especialidades">
+            @if(count($espNombres))
+              @foreach($espNombres as $n)
+                <span class="chip">{{ $n }}</span>
+              @endforeach
+            @else
+              <div class="help">—</div>
+            @endif
+          </td>
+
+          <td data-label="Acciones">
+            <div class="actions">
+              <button form="update-{{ $u->id }}" type="submit" class="btn btn-primary">
+                <span class="material-symbols-outlined">save</span> Guardar
+              </button>
+              @unless($esAdmin)
+                <button form="delete-{{ $u->id }}" type="submit" class="btn btn-outline"
+                        onclick="return confirm('¿Eliminar usuario {{ $u->name }}?');">
+                  <span class="material-symbols-outlined">delete</span>
+                </button>
+              @endunless
+            </div>
+          </td>
+        </tr>
+      @endforeach
+      </tbody>
+    </table>
+
+    <div class="card-footer">
+      @if ($users->hasPages())
+        <div>Página {{ $users->currentPage() }} de {{ $users->lastPage() }}</div>
+      @endif
+      {!! $users->withQueryString()->links() !!}
     </div>
+  </div>
+
 </div>
-</body>
-</html>
+@endsection

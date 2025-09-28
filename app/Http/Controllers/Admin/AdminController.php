@@ -137,22 +137,19 @@ class AdminController extends Controller
         $requestedRoleId = (int) $request->role_id;
         $isAdminTarget   = $user->roles()->where('name','administrador')->exists();
 
-        // Evitar que cualquiera cambie el rol de una cuenta Administrador
         if ($isAdminTarget && $requestedRoleId !== (int) $currentRoleId) {
             return back()->withErrors(['No puedes cambiar el rol de una cuenta con rol Administrador.']);
         }
 
-        // Evitar que un admin se baje su propio rol
         if ($user->id === Auth::id() && $requestedRoleId !== (int) $currentRoleId) {
             return back()->withErrors(['No puedes cambiar tu propio rol.']);
         }
 
-        // Evitar dejar el sistema sin administradores (defensa adicional)
         if (!$isAdminTarget && $this->roleNameById($requestedRoleId) === 'administrador') {
-            // permitido elevar a admin; no aplica la restricción de "último admin"
+            // ok elevar a admin
         } else {
-            $seEstáQuitandoAdmin = $isAdminTarget && $requestedRoleId !== (int) $currentRoleId;
-            if ($seEstáQuitandoAdmin) {
+            $seEstaQuitandoAdmin = $isAdminTarget && $requestedRoleId !== (int) $currentRoleId;
+            if ($seEstaQuitandoAdmin) {
                 $totalAdmins = User::whereHas('roles', fn($q)=>$q->where('name','administrador'))->count();
                 if ($totalAdmins <= 1) {
                     return back()->withErrors(['No puedes quitar el rol del único Administrador del sistema.']);
@@ -160,7 +157,6 @@ class AdminController extends Controller
             }
         }
 
-        // Actualizar datos base
         $user->name  = $request->name;
         $user->email = $request->email;
 
@@ -170,7 +166,6 @@ class AdminController extends Controller
 
         $user->save();
 
-        // Sincronizar rol (si no es administrador objetivo)
         $roleIdToSync = $isAdminTarget ? $currentRoleId : $requestedRoleId;
         $user->roles()->sync([$roleIdToSync]);
 
@@ -221,8 +216,9 @@ class AdminController extends Controller
             'fecha_nacimiento' => ['required','date','before:today'],
             'sexo'             => ['nullable','in:Masculino,Femenino,Otro'],
             'avatar'           => ['nullable','image','mimes:jpg,jpeg,png,webp','max:2048'],
-            'especialidades'   => ['nullable','array'],
-            'especialidades.*' => ['integer','exists:especialidades,id'],
+
+            // SOLO UNA ESPECIALIDAD (obligatoria)
+            'especialidad_id'  => ['required','integer','exists:especialidades,id'],
         ];
 
         $messages = [
@@ -239,8 +235,8 @@ class AdminController extends Controller
             'image'                 => 'La :attribute debe ser una imagen.',
             'mimes'                 => 'La :attribute debe ser jpg, jpeg, png o webp.',
             'max'                   => 'La :attribute no debe superar :max.',
-            'array'                 => 'Selecciona al menos una opción válida en :attribute.',
-            'exists'                => 'Alguna de las :attribute seleccionadas no existe.',
+            'integer'               => 'Selecciona una especialidad válida.',
+            'exists'                => 'La especialidad seleccionada no existe.',
             'dni.required'          => 'El número de cédula es obligatorio.',
             'dni.digits'            => 'El número de cédula debe tener exactamente 10 dígitos.',
             'dni.unique'            => 'Este número de cédula ya está registrado.',
@@ -257,7 +253,7 @@ class AdminController extends Controller
             'fecha_nacimiento'      => 'fecha de nacimiento',
             'sexo'                  => 'sexo',
             'avatar'                => 'foto',
-            'especialidades'        => 'especialidades',
+            'especialidad_id'       => 'especialidad',
         ];
 
         $validated = $request->validate($rules, $messages, $attributes);
@@ -282,9 +278,8 @@ class AdminController extends Controller
         $role = Role::where('name', 'doctor')->firstOrFail();
         $user->roles()->sync([$role->id]);
 
-        if (!empty($validated['especialidades'])) {
-            $user->especialidades()->sync($validated['especialidades']);
-        }
+        // Asignar SOLO una especialidad
+        $user->especialidades()->sync([$validated['especialidad_id']]);
 
         return redirect()->route('admin.usuarios.index')->with('success', 'Doctor creado correctamente.');
     }
@@ -300,9 +295,6 @@ class AdminController extends Controller
         return response()->json($doctores);
     }
 
-    /* =========================
-     *  Pacientes (solo admin)
-     * ========================= */
     public function crearPaciente()
     {
         return view('admin.paciente-create');
@@ -365,7 +357,6 @@ class AdminController extends Controller
         return redirect()->route('admin.usuarios.index')->with('success', 'Paciente creado correctamente.');
     }
 
-    /** Utilidad interna para obtener el nombre del rol por id */
     private function roleNameById(?int $roleId): ?string
     {
         if (!$roleId) return null;

@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 use App\Models\User;
 use App\Models\Role;
 
@@ -17,12 +16,11 @@ class DatabaseSeeder extends Seeder
             EspecialidadesSeeder::class,
         ]);
 
-        
         $admin = User::updateOrCreate(
             ['email' => 'admin@clinic.test'], 
             [
                 'name'     => 'Administrador',
-                'password' => Hash::make(env('ADMIN_PASSWORD', Str::password())),        
+                'password' => 'admin1234', 
                 'active'   => true,
             ]
         );

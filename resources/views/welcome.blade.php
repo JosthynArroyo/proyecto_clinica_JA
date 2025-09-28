@@ -4,29 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Clínica Los Ángeles</title>
-    @vite('resources/css/welcome.css')
+    @vite(['resources/css/welcome.css','resources/js/welcome-login-modal.js'])
 </head>
 <body>
     <header class="header">
         <div class="menu container">
             <a href="{{ url('/') }}" class="logo">Clinica Los Angeles</a>
+
             <input type="checkbox" id="menu">
-            <label for="menu">
+            <label for="menu" aria-label="Abrir menú">
                 <img src="{{ asset('img/menu.png') }}" class="menu-icono" alt="Menú">
             </label>
-            <nav class="navbar">
+
+            <nav class="navbar" aria-label="Navegación principal">
                 <ul>
                     @if (Route::has('login'))
                         @auth
                             <li><a href="{{ route('home') }}">Mi Panel</a></li>
                         @else
-                            <li><a href="{{ route('login') }}">Iniciar Sesión</a></li>
+                            <li>
+                                <a href="#" data-login-trigger class="font-semibold">Iniciar Sesión</a>
+                                <noscript><a href="{{ route('login') }}">Iniciar Sesión</a></noscript>
+                            </li>
                         @endauth
                     @endif
 
-                    @if (Route::has('register') && !Auth::check())
-                        <li><a href="{{ route('register') }}">Registrarse</a></li>
-                    @endif
+                    {{-- Registro deshabilitado porque lo hace el administrador --}}
+                    {{-- <li><a href="{{ route('register') }}">Registrarse</a></li> --}}
 
                     <li><a href="{{ route('contacto.form') }}">Contacto</a></li>
                 </ul>
@@ -42,11 +46,8 @@
                 @auth
                     <a href="{{ route('paciente.dashboard') }}" class="btn-1">Agendar Cita</a>
                 @else
-                    @if (Route::has('register'))
-                        <a href="{{ route('register') }}" class="btn-1">Agendar Cita</a>
-                    @elseif (Route::has('login'))
-                        <a href="{{ route('login') }}" class="btn-1">Agendar Cita</a>
-                    @endif
+                    <a href="#" data-login-trigger class="btn-1">Agendar Cita</a>
+                    <noscript><a href="{{ route('login') }}" class="btn-1">Agendar Cita</a></noscript>
                 @endauth
             </div>
 
@@ -133,33 +134,18 @@
             <p>Consulta los precios aproximados de nuestros servicios médicos. Pregunta por paquetes y promociones.</p>
             <table>
                 <tbody>
-                    <tr>
-                        <th>Medicina General</th>
-                        <td>$25</td>
-                    </tr>
-                    <tr>
-                        <th>Cardiología</th>
-                        <td>$40</td>
-                    </tr>
-                    <tr>
-                        <th>Pediatría</th>
-                        <td>$35</td>
-                    </tr>
-                    <tr>
-                        <th>Dermatología</th>
-                        <td>$30</td>
-                    </tr>
+                    <tr><th>Medicina General</th><td>$25</td></tr>
+                    <tr><th>Cardiología</th><td>$40</td></tr>
+                    <tr><th>Pediatría</th><td>$35</td></tr>
+                    <tr><th>Dermatología</th><td>$30</td></tr>
                 </tbody>
             </table>
 
             @auth
                 <a href="{{ route('paciente.dashboard') }}" class="btn-1">Agendar Cita</a>
             @else
-                @if (Route::has('register'))
-                    <a href="{{ route('register') }}" class="btn-1">Agendar Cita</a>
-                @elseif (Route::has('login'))
-                    <a href="{{ route('login') }}" class="btn-1">Agendar Cita</a>
-                @endif
+                <a href="#" data-login-trigger class="btn-1">Agendar Cita</a>
+                <noscript><a href="{{ route('login') }}" class="btn-1">Agendar Cita</a></noscript>
             @endauth
         </div>
 
@@ -186,7 +172,6 @@
                 <p>Dr. Juan Torres — Cardiología. Prevención y manejo integral de riesgo cardiovascular.</p>
             </div>
         </div>
-        
     </section>
 
     <footer id="footer">
@@ -194,5 +179,48 @@
             <p>Clínica Los Ángeles © {{ date('Y') }} - Todos los derechos reservados.</p>
         </div>
     </footer>
+
+    {{-- Modal de login --}}
+    <div id="loginModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
+        <div class="modal-backdrop"></div>
+        <div class="modal-dialog">
+            <div class="panel">
+                <div class="panel-header">
+                    <h3 id="loginTitle">Iniciar sesión</h3>
+                    <button id="closeLoginModal" class="close-btn" aria-label="Cerrar modal">✕</button>
+                </div>
+                <div class="panel-body">
+                    @if(session('status'))
+                        <div class="alert ok">{{ session('status') }}</div>
+                    @endif
+                    @if($errors->any())
+                        <span data-open-login-onload hidden></span>
+                        <div class="alert err">Revisa tus datos e inténtalo nuevamente.</div>
+                    @endif
+
+                    <form method="POST" action="{{ route('login') }}" id="loginForm">
+                        @csrf
+                        <div class="field">
+                            <label>Correo</label>
+                            <input type="email" name="email" autocomplete="email" required value="{{ old('email') }}" placeholder="correo@ejemplo.com">
+                            @error('email') <p class="error">{{ $message }}</p> @enderror
+                        </div>
+                        <div class="field">
+                            <label>Contraseña</label>
+                            <input type="password" name="password" autocomplete="current-password" required placeholder="••••••••">
+                            @error('password') <p class="error">{{ $message }}</p> @enderror
+                        </div>
+                        <div class="row">
+                            <label class="remember"><input type="checkbox" name="remember"> Recuérdame</label>
+                            @if (Route::has('password.request'))
+                                <a href="{{ route('password.request') }}">¿Olvidaste tu contraseña?</a>
+                            @endif
+                        </div>
+                        <button type="submit" class="submit">Entrar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

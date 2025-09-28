@@ -26,8 +26,13 @@ class EnviarConfirmacionCitaJob implements ShouldQueue
     public function handle()
     {
         Mail::to($this->cita->paciente->email)
+            ->cc($this->cita->doctor->email)
             ->send(new ConfirmacionCitaMail($this->cita));
 
-        Log::info("Confirmación enviada a: {$this->cita->paciente->name} ({$this->cita->paciente->email})");
+        Log::info(
+            "Confirmación enviada a paciente y doctor: " .
+            "{$this->cita->paciente->name} ({$this->cita->paciente->email}), " .
+            "{$this->cita->doctor->name} ({$this->cita->doctor->email})"
+        );
     }
 }

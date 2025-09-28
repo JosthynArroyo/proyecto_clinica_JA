@@ -10,37 +10,32 @@
   --radius-lg:22px;
   --radius-sm:14px;
 }
-
 * { box-sizing:border-box }
-html,body { height:100% }
-
-body {
+html, body.paciente-body--crear-cita { height:100% }
+body.paciente-body--crear-cita {
   margin:0;
   font-family:"Poppins",system-ui,-apple-system,Segoe UI,Roboto,Arial;
   color:var(--ink);
   background:radial-gradient(1200px 500px at 20% -10%, #f1f3ff 0%, #ffffff 55%) fixed;
 }
-
-.page {
+.crear-cita-page {
   max-width:980px;
   margin:42px auto;
   padding:0 20px;
 }
-
-.card {
+.crear-cita-page .card {
   background:var(--card);
   border-radius:var(--radius-lg);
   box-shadow:var(--shadow);
   overflow:hidden;
   border:1px solid #f2f4ff;
 }
-
 /* Header */
-.card-header {
+.crear-cita-page .card-header {
   padding:24px 24px 18px;
   background:linear-gradient(135deg, var(--primary), var(--primary-2));
 }
-.header-panel {
+.crear-cita-page .header-panel {
   background:#ffffff;
   border-radius:16px;
   padding:18px 20px;
@@ -51,40 +46,36 @@ body {
   max-width:92%;
   margin:0 auto;
 }
-.card-header .title {
+.crear-cita-page .card-header .title {
   color:#1f2330;
   font-size:1.6rem;
   font-weight:800;
   margin:0 0 4px 0;
 }
-.card-header .subtitle {
+.crear-cita-page .card-header .subtitle {
   color:#667085;
   margin:0;
   font-weight:600;
   line-height:1.3;
 }
-
 /* Content */
-.card-body { padding:26px; }
-
+.crear-cita-page .card-body { padding:26px; }
 /* Form */
-.form-grid {
+.crear-cita-page .form-grid {
   display:grid;
   grid-template-columns:1fr 1fr;
   gap:16px;
   margin-top:8px;
 }
-.form-grid .col-span-2 { grid-column:1 / -1; }
-
-label {
+.crear-cita-page .form-grid .col-span-2 { grid-column:1 / -1; }
+.crear-cita-page label {
   display:block;
   font-size:.88rem;
   font-weight:800;
   color:#3a3f52;
   margin:10px 0 8px 6px;
 }
-
-.input {
+.crear-cita-page .input {
   position:relative;
   display:flex;
   align-items:center;
@@ -94,18 +85,18 @@ label {
   padding:10px 12px 10px 40px;
   transition:border .2s, box-shadow .2s;
 }
-.input:focus-within {
+.crear-cita-page .input:focus-within {
   border-color:var(--primary);
   box-shadow:0 0 0 6px var(--ring);
 }
-.input .icon {
+.crear-cita-page .input .icon {
   position:absolute;
   left:12px;
   top:50%;
   transform:translateY(-50%);
   opacity:.75;
 }
-.input .arrow {
+.crear-cita-page .input .arrow {
   position:absolute;
   right:12px;
   top:50%;
@@ -113,9 +104,8 @@ label {
   opacity:.7;
   pointer-events:none;
 }
-
-.input input,
-.input select {
+.crear-cita-page .input input,
+.crear-cita-page .input select {
   width:100%;
   border:none;
   outline:none;
@@ -126,24 +116,21 @@ label {
   -webkit-appearance:none;
   -moz-appearance:none;
 }
-
-.input select:disabled { color:#9aa0b5; }
-
-.help {
+.crear-cita-page .input select:disabled { color:#9aa0b5; }
+.crear-cita-page .help {
   margin-top:6px;
   font-size:.78rem;
   color:var(--muted);
 }
-.error {
+.crear-cita-page .error {
   display:block;
   margin-top:6px;
   color:var(--danger);
   font-size:.83rem;
   font-weight:700;
 }
-
 /* Alert */
-.alert {
+.crear-cita-page .alert {
   background:#ffe8ec;
   color:#a21736;
   border:1px solid #ffd6df;
@@ -152,15 +139,14 @@ label {
   font-weight:700;
   margin-bottom:14px;
 }
-
 /* Actions */
-.actions {
+.crear-cita-page .actions {
   display:flex;
   gap:12px;
   margin-top:22px;
   flex-wrap:wrap;
 }
-.btn {
+.crear-cita-page .btn {
   appearance:none;
   border:none;
   cursor:pointer;
@@ -173,21 +159,20 @@ label {
   display:inline-flex;
   align-items:center;
 }
-.btn:active { transform:translateY(1px) scale(.995) }
-.btn-primary {
+.crear-cita-page .btn:active { transform:translateY(1px) scale(.995) }
+.crear-cita-page .btn-primary {
   color:#fff;
   background:linear-gradient(135deg, var(--primary), var(--primary-2));
   box-shadow:0 12px 24px rgba(107,116,255,.30);
 }
-.btn-primary:hover { filter:brightness(1.03) }
-.btn-ghost {
+.crear-cita-page .btn-primary:hover { filter:brightness(1.03) }
+.crear-cita-page .btn-ghost {
   background:#f2f5ff;
   color:#2a2f45;
   border:1px solid #e5e9ff;
 }
-
 /* Responsive */
 @media (max-width:780px) {
-  .header-panel { max-width:100% }
-  .form-grid { grid-template-columns:1fr }
+  .crear-cita-page .header-panel { max-width:100% }
+  .crear-cita-page .form-grid { grid-template-columns:1fr }
 }

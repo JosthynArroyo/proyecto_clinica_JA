@@ -1,7 +1,9 @@
 <?php
+// routes/web.php
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 use App\Http\Controllers\CitaController;
 use App\Http\Controllers\Admin\AdminController as AdminDashboardController;
 use App\Http\Controllers\ExportCitasController;
@@ -31,21 +33,15 @@ Route::post('/contacto', [ContactoController::class, 'enviarFormulario'])->name(
 Route::middleware(['auth', 'role:administrador'])->prefix('admin')->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'dashboard'])->name('admin.dashboard');
     Route::get('/dashboard/resumen', [AdminDashboardController::class, 'resumenGlobal'])->name('admin.dashboard.resumen');
-
     Route::get('/perfil', [AdminDashboardController::class, 'editarPerfil'])->name('admin.perfil.edit');
     Route::post('/perfil', [AdminDashboardController::class, 'actualizarPerfil'])->name('admin.perfil.update');
-
     Route::get('/usuarios', [AdminDashboardController::class, 'usuarios'])->name('admin.usuarios.index');
     Route::put('/usuarios/{user}', [AdminDashboardController::class, 'usuariosUpdate'])->name('admin.usuarios.update');
     Route::delete('/usuarios/{user}', [AdminDashboardController::class, 'usuariosDestroy'])->name('admin.usuarios.destroy');
-
     Route::get('/doctores/crear', [AdminDashboardController::class, 'crearDoctor'])->name('admin.doctores.crear');
     Route::post('/doctores', [AdminDashboardController::class, 'storeDoctor'])->name('admin.doctores.store');
-
-    // SOLO admin registra pacientes
     Route::get('/pacientes/crear', [AdminDashboardController::class, 'crearPaciente'])->name('admin.pacientes.crear');
     Route::post('/pacientes', [AdminDashboardController::class, 'storePaciente'])->name('admin.pacientes.store');
-
     Route::get('/citas/export', [ExportCitasController::class, 'exportarCitas'])->name('admin.citas.export');
 });
 
@@ -53,7 +49,6 @@ Route::middleware(['auth', 'role:paciente'])->prefix('paciente')->group(function
     Route::get('/dashboard', [PacienteDashboardController::class, 'dashboard'])->name('paciente.dashboard');
     Route::get('/perfil', [PacienteDashboardController::class, 'editarPerfil'])->name('paciente.perfil.edit');
     Route::post('/perfil', [PacienteDashboardController::class, 'actualizarPerfil'])->name('paciente.perfil.update');
-
     Route::get('/citas', [CitaController::class, 'index'])->name('paciente.citas');
     Route::get('/crear-cita', [CitaController::class, 'create'])->name('paciente.crear-cita');
     Route::post('/crear-cita', [CitaController::class, 'store'])->name('paciente.crear-cita.store');
@@ -68,16 +63,26 @@ Route::middleware(['auth', 'role:doctor'])->prefix('doctor')->group(function () 
     Route::get('/dashboard', [DoctorDashboardController::class, 'dashboard'])->name('doctor.dashboard');
     Route::get('/perfil', [DoctorDashboardController::class, 'editarPerfil'])->name('doctor.perfil.edit');
     Route::post('/perfil', [DoctorDashboardController::class, 'actualizarPerfil'])->name('doctor.perfil.update');
-
     Route::get('/citas', [CitaController::class, 'indexDoctor'])->name('doctor.citas');
     Route::post('/citas/{id}/aceptar', [CitaController::class, 'aceptar'])->name('doctor.citas.aceptar');
     Route::post('/citas/{id}/rechazar', [CitaController::class, 'rechazar'])->name('doctor.citas.rechazar');
     Route::post('/citas/{id}/realizar', [CitaController::class, 'realizar'])->name('doctor.citas.realizar');
-
     Route::get('/dashboard/data', [DoctorDashboardController::class, 'dashboardData'])->name('doctor.dashboard.data');
 });
 
-Route::post('/salir', function () {
+
+Route::post('/salir', function (Request $request) {
     Auth::logout();
+    $request->session()->invalidate();
+    $request->session()->regenerateToken();
     return redirect('/');
 })->name('salir');
+
+Route::get('/salir', function (Request $request) {
+    if ($request->user()) {
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+    }
+    return redirect('/');
+})->name('salir.get');

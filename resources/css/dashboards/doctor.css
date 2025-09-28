@@ -65,6 +65,13 @@ body {
   margin: 0 auto;
 }
 
+.container.has-no-right {
+  grid-template-columns: 14rem auto;
+}
+.container.has-right {
+  grid-template-columns: 14rem auto 14rem;
+}
+
 a {
   color: var(--clr-dark);
 }

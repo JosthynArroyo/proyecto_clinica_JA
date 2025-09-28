@@ -1,231 +1,200 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Crear doctor | Admin</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@300;400;500">
-    <style>
-        :root{
-            --bg: var(--clr-color-background, #f6f6f9);
-            --card: var(--clr-white, #ffffff);
-            --text: var(--clr-dark, #0f172a);
-            --muted: var(--clr-dark-variant, #677483);
-            --primary: var(--clr-primary, #7380ec);
-            --title: #4f46e5;
-            --danger: var(--clr-danger, #ff7782);
-            --success: var(--clr-success, #41f1b6);
-            --border: #d2dae6;          
-            --border-strong: #c3ccda;    
-            --shadow: 0 10px 24px rgba(16,24,40,.06);
-            --radius: 16px;
-        }
-        *{box-sizing:border-box}
-        body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,"Noto Sans",sans-serif}
-        .wrap{max-width:880px;margin:28px auto;padding:0 16px}
+{{-- resources/views/admin/doctor-create.blade.php --}}
+@extends('layouts.admin')
+@section('title','Crear doctor | Admin')
 
+@push('head')
+<style>
+  .page{max-width:880px;margin:0 auto}
+  .card{background:#fff;border:1px solid #e7ebf3;border-radius:16px;box-shadow:0 10px 24px rgba(16,24,40,.06);padding:20px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .full{grid-column:1/-1}
+  label{display:block;margin:2px 0 6px;color:#677483;font-size:.92rem}
+  .field{padding-bottom:12px;border-bottom:1px dashed #e2e8f0}
+  .field:last-child{border-bottom:0}
+  .input,.select{width:100%;height:44px;background:#fbfcfe;border:1.5px solid #c3ccda;border-radius:12px;padding:0 .85rem}
+  .input:focus,.select:focus{outline:none;border-color:#7380ec;box-shadow:0 0 0 4px rgba(115,128,236,.18)}
+  .input-wrap{position:relative}.input-wrap .input{padding-right:2.6rem}
+  .toggle-visibility{position:absolute;right:.45rem;top:50%;transform:translateY(-50%);border:0;background:transparent;cursor:pointer}
 
-        .header{
-            display:grid;
-            grid-template-columns:1fr auto 1fr;
-            align-items:center;
-            gap:1rem;
-            margin-bottom:16px
-        }
-        .back{
-            justify-self:start;
-            display:inline-flex;align-items:center;gap:.45rem;
-            padding:.65rem .9rem;border:1px solid var(--border);
-            border-radius:12px;background:#fff;text-decoration:none;color:var(--text);
-            box-shadow:var(--shadow)
-        }
-        .back:hover{background:#eef2ff}
-        .title{
-            justify-self:center;
-            font-size:1.7rem;font-weight:800;letter-spacing:.2px;
-            color:var(--title);
-        }
+  /* Estilos para radios en formato "chip" (SOLO UNA OPCIÓN) */
+  .chips{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:.6rem}
+  .chip{
+    position:relative; cursor:pointer; user-select:none;
+    display:flex; align-items:center; gap:.55rem;
+    border:1.5px solid #c3ccda; border-radius:12px;
+    padding:.65rem .8rem; background:#fff; transition:all .15s ease-in-out;
+  }
+  .chip:hover{border-color:#9aa4b6;background:#f7f9ff}
+  .chip > input{position:absolute; inset:0; opacity:0; cursor:pointer}
+  .chip:has(> input:checked){
+    background:#eef2ff; border-color:#7380ec; box-shadow:0 0 0 3px rgba(115,128,236,.14) inset;
+  }
+  .chip:has(> input:checked)::before{
+    content:"radio_button_checked"; font-family:"Material Symbols Outlined";
+    font-variation-settings:'FILL' 1,'wght' 600,'GRAD' 0,'opsz' 24;
+    display:inline-flex; align-items:center; justify-content:center;
+    width:20px; height:20px; border-radius:50%; color:#7380ec; font-size:18px;
+  }
+  .chip::before{
+    content:"radio_button_unchecked"; font-family:"Material Symbols Outlined";
+    font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;
+    display:inline-flex; align-items:center; justify-content:center;
+    width:20px; height:20px; border-radius:50%; color:#9aa4b6; font-size:18px;
+  }
 
-        .alert{border:1px solid;border-radius:12px;padding:.85rem 1rem;margin-bottom:12px}
-        .alert--ok{background:#f0fdf4;border-color:#c7f0d2;color:#14532d}
-        .alert--err{background:#fef2f2;border-color:#fecaca;color:#7f1d1d}
+  .actions{margin-top:16px;display:flex;justify-content:flex-end}
+  .btn{border:0;padding:.85rem 1.1rem;border-radius:12px;font-weight:800;cursor:pointer;background:#7380ec;color:#fff}
+  .error-text{margin-top:6px;color:#b91c1c}
+  .hint{color:#64748b;font-size:.9rem;margin-top:6px}
+</style>
+@endpush
 
-        .card{
-            background:var(--card);
-            border:1px solid #e7ebf3;
-            border-radius:var(--radius);
-            padding:20px;
-            box-shadow:var(--shadow)
-        }
-        .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-        .full{grid-column:1/-1}
-        label{display:block;margin:2px 0 6px;color:var(--muted);font-size:.92rem}
-
-
-        input,select{
-            width:100%;
-            padding:.7rem .8rem;
-            border:1.5px solid var(--border-strong);
-            border-radius:12px;
-            background:#fff;color:var(--text);
-            transition: box-shadow .2s,border-color .2s
-        }
-        input:focus,select:focus{
-            outline:none;border-color:var(--primary);
-            box-shadow:0 0 0 4px rgba(115,128,236,.18)
-        }
-
-        .input-wrap{position:relative}
-        .input-wrap input{padding-right:2.6rem}
-        .toggle-visibility{
-            position:absolute;right:.45rem;top:50%;transform:translateY(-50%);
-            display:inline-flex;align-items:center;justify-content:center;
-            width:2.1rem;height:2.1rem;border-radius:10px;background:transparent;border:0;
-            color:#5b657f;cursor:pointer
-        }
-        .toggle-visibility:hover{background:#f3f4f6}
-        .toggle-visibility:focus{outline:2px solid var(--primary);outline-offset:2px}
-
-        .actions{margin-top:16px;display:flex;gap:.6rem;justify-content:flex-end}
-        .btn{border:0;padding:.75rem 1.1rem;border-radius:12px;font-weight:700;cursor:pointer}
-        .btn-primary{background:var(--primary);color:#fff}
-        .btn-primary:hover{filter:brightness(0.95)}
-
-        .material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24}
-
-        .chips{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:.6rem}
-        .chip{display:flex;align-items:center;gap:.5rem;border:1.5px solid var(--border-strong);border-radius:10px;padding:.55rem .7rem;background:#fff}
-
-        @media (max-width:800px){.wrap{max-width:95%}}
-        @media (max-width:640px){
-            .grid{grid-template-columns:1fr}
-            .title{font-size:1.45rem}
-        }
-        @media (max-width:400px){
-            .back span.material-symbols-outlined{font-size:18px}
-            .back{padding:.5rem .7rem}
-        }
-    </style>
-</head>
-<body>
-<div class="wrap">
-    <div class="header">
-        <a class="back" href="{{ route('admin.dashboard') }}" aria-label="Volver al panel">
-            <span class="material-symbols-outlined">arrow_back</span>
-            <span>Volver</span>
-        </a>
-        <div class="title">Registrar nuevo doctor</div>
-        <div></div>
-    </div>
+@section('main')
+  <div class="page">
+    <h2 style="text-align:center;color:#4f46e5;font-weight:800;margin:0 0 14px">Registrar nuevo doctor</h2>
 
     @if(session('success'))
-        <div class="alert alert--ok">{{ session('success') }}</div>
+      <div class="card" style="border:1px solid #c7f0d2;background:#f0fdf4;color:#14532d;margin-bottom:12px">{{ session('success') }}</div>
     @endif
     @if($errors->any())
-        <div class="alert alert--err">
-            <ul style="margin:0;padding-left:18px;">@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul>
-        </div>
+      <div class="card" style="border:1px solid #fecaca;background:#fef2f2;color:#7f1d1d;margin-bottom:12px">
+        <ul style="margin:0 0 0 18px">@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul>
+      </div>
     @endif
 
-    <form class="card" action="{{ route('admin.doctores.store') }}" method="POST" enctype="multipart/form-data" novalidate>
-        @csrf
-        <div class="grid">
-            <div>
-                <label>Nombre</label>
-                <input type="text" name="name" value="{{ old('name') }}" required>
-            </div>
-            <div>
-                <label>Correo</label>
-                <input type="email" name="email" value="{{ old('email') }}" required>
-            </div>
-
-            <div>
-                <label>Contraseña</label>
-                <div class="input-wrap">
-                    <input type="password" id="password" name="password" required>
-                    <button type="button" class="toggle-visibility" data-target="password" title="Mostrar u ocultar contraseña" aria-label="Mostrar u ocultar contraseña">
-                        <span class="material-symbols-outlined">visibility</span>
-                    </button>
-                </div>
-            </div>
-            <div>
-                <label>Confirmar contraseña</label>
-                <div class="input-wrap">
-                    <input type="password" id="password_confirmation" name="password_confirmation" required>
-                    <button type="button" class="toggle-visibility" data-target="password_confirmation" title="Mostrar u ocultar confirmación" aria-label="Mostrar u ocultar confirmación">
-                        <span class="material-symbols-outlined">visibility</span>
-                    </button>
-                </div>
-            </div>
-
-            <div>
-                <label>Teléfono (10 dígitos)</label>
-                <input type="text" name="telefono" value="{{ old('telefono') }}" minlength="10" maxlength="10" pattern="\d{10}" inputmode="numeric" placeholder="0991234567">
-            </div>
-            <div>
-                <label>Número de Cédula (10 dígitos)</label>
-                <input type="text" name="dni" value="{{ old('dni') }}" minlength="10" maxlength="10" pattern="\d{10}" inputmode="numeric" placeholder=" ej. 1750XXXXXX">
-            </div>
-
-            <div class="full">
-                <label>Dirección</label>
-                <input type="text" name="direccion" value="{{ old('direccion') }}">
-            </div>
-
-            <div>
-                <label>Fecha de nacimiento</label>
-                <input type="date" name="fecha_nacimiento" value="{{ old('fecha_nacimiento') }}">
-            </div>
-            <div>
-                <label>Sexo</label>
-                <select name="sexo">
-                    <option value="">Seleccionar</option>
-                    <option value="Masculino" @selected(old('sexo')==='Masculino')>Masculino</option>
-                    <option value="Femenino" @selected(old('sexo')==='Femenino')>Femenino</option>
-                    <option value="Otro" @selected(old('sexo')==='Otro')>Otro</option>
-                </select>
-            </div>
-
-            <div class="full">
-                <label>Foto (opcional)</label>
-                <input type="file" name="avatar" accept="image/*">
-            </div>
-
-            <div class="full">
-                <label>Especialidades del doctor</label>
-                <div class="chips">
-                    @foreach(($especialidades ?? []) as $esp)
-                        <label class="chip">
-                            <input type="checkbox" name="especialidades[]" value="{{ $esp->id }}" @checked(collect(old('especialidades',[]))->contains($esp->id))>
-                            <span>{{ $esp->nombre }}</span>
-                        </label>
-                    @endforeach
-                </div>
-                @error('especialidades')
-                    <div style="margin-top:6px;color:#b91c1c">{{ $message }}</div>
-                @enderror
-            </div>
+    <form id="form-crear-doctor" class="card" action="{{ route('admin.doctores.store') }}" method="POST" enctype="multipart/form-data" novalidate>
+      @csrf
+      <div class="grid">
+        <div class="field">
+          <label>Nombre</label>
+          <input class="input" type="text" name="name" value="{{ old('name') }}" required>
+        </div>
+        <div class="field">
+          <label>Correo</label>
+          <input class="input" type="email" name="email" value="{{ old('email') }}" required>
         </div>
 
-        <div class="actions">
-            <button type="submit" class="btn btn-primary">Guardar doctor</button>
+        <div class="field">
+          <label>Contraseña</label>
+          <div class="input-wrap">
+            <input class="input" type="password" id="password" name="password" required>
+            <button type="button" class="toggle-visibility" data-target="password" title="Mostrar/ocultar">
+              <span class="material-symbols-outlined">visibility</span>
+            </button>
+          </div>
         </div>
+        <div class="field">
+          <label>Confirmar contraseña</label>
+          <div class="input-wrap">
+            <input class="input" type="password" id="password_confirmation" name="password_confirmation" required>
+            <button type="button" class="toggle-visibility" data-target="password_confirmation" title="Mostrar/ocultar">
+              <span class="material-symbols-outlined">visibility</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Teléfono (10 dígitos)</label>
+          <input class="input" type="text" name="telefono" value="{{ old('telefono') }}" minlength="10" maxlength="10" pattern="\d{10}" inputmode="numeric" placeholder="0991234567">
+        </div>
+        <div class="field">
+          <label>Cédula (10 dígitos)</label>
+          <input class="input" type="text" name="dni" value="{{ old('dni') }}" minlength="10" maxlength="10" pattern="\d{10}" inputmode="numeric" placeholder="1750XXXXXX">
+        </div>
+
+        <div class="full field">
+          <label>Dirección</label>
+          <input class="input" type="text" name="direccion" value="{{ old('direccion') }}">
+        </div>
+
+        <div class="field">
+          <label>Fecha de nacimiento</label>
+          <input class="input" type="date" name="fecha_nacimiento" value="{{ old('fecha_nacimiento') }}" required>
+        </div>
+        <div class="field">
+          <label>Sexo</label>
+          <select class="select" name="sexo">
+            <option value="">Seleccionar</option>
+            <option value="Masculino" @selected(old('sexo')==='Masculino')>Masculino</option>
+            <option value="Femenino" @selected(old('sexo')==='Femenino')>Femenino</option>
+            <option value="Otro" @selected(old('sexo')==='Otro')>Otro</option>
+          </select>
+        </div>
+
+        <div class="full field">
+          <label>Foto (opcional)</label>
+          <input class="input" type="file" name="avatar" accept="image/*">
+        </div>
+
+        {{-- ESPECIALIDAD ÚNICA (OBLIGATORIA) --}}
+        <div class="full field">
+          <label>Especialidad del doctor <span style="color:#b91c1c">*</span></label>
+          <div class="chips">
+            @foreach(($especialidades ?? []) as $esp)
+              <label class="chip">
+                <input
+                  type="radio"
+                  name="especialidad_id"
+                  value="{{ $esp->id }}"
+                  required
+                  @checked( (string)old('especialidad_id') === (string)$esp->id )
+                >
+                <span>{{ $esp->nombre }}</span>
+              </label>
+            @endforeach
+          </div>
+          @error('especialidad_id')<div class="error-text">{{ $message }}</div>@enderror
+          <div class="hint">Selecciona exactamente una especialidad.</div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button type="submit" class="btn">Guardar doctor</button>
+      </div>
     </form>
-</div>
+  </div>
+@endsection
 
+@push('scripts')
 <script>
-    document.querySelectorAll('.toggle-visibility').forEach(function(btn){
-        var input = document.getElementById(btn.dataset.target);
-        var icon  = btn.querySelector('.material-symbols-outlined');
-        btn.addEventListener('click', function(){
-            var showing = input.type === 'text';
-            input.type = showing ? 'password' : 'text';
-            icon.textContent = showing ? 'visibility' : 'visibility_off';
-        });
-        btn.addEventListener('keydown', function(e){
-            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); btn.click(); }
-        });
+  // Mostrar/ocultar contraseña
+  document.querySelectorAll('.toggle-visibility').forEach((btn)=>{
+    const input=document.getElementById(btn.dataset.target);
+    const icon=btn.querySelector('.material-symbols-outlined');
+    btn.addEventListener('click',()=>{
+      const isText = input.type==='text';
+      input.type = isText ? 'password' : 'text';
+      icon.textContent = isText ? 'visibility' : 'visibility_off';
     });
+  });
+
+  // Fallback visual si el navegador no soporta :has()
+  (function(){
+    const supportsHas = CSS.supports && CSS.supports('selector(:has(*))');
+    if (supportsHas) return;
+    // Para radios, aplicar clase activa al contenedor seleccionado
+    const radios = Array.from(document.querySelectorAll('input[name="especialidad_id"]'));
+    const paint = ()=>{
+      radios.forEach(r=>{
+        const chip = r.closest('.chip');
+        chip.classList.toggle('chip--active', r.checked);
+      });
+    };
+    radios.forEach(r=>r.addEventListener('change', paint));
+    paint();
+  })();
 </script>
-</body>
-</html>
+
+<style>
+  /* Fallback visual (cuando no hay :has) */
+  .chip.chip--active{
+    background:#eef2ff; border-color:#7380ec; box-shadow:0 0 0 3px rgba(115,128,236,.14) inset;
+  }
+  .chip.chip--active::before{
+    content:"radio_button_checked"; font-family:"Material Symbols Outlined";
+    font-variation-settings:'FILL' 1,'wght' 600,'GRAD' 0,'opsz' 24;
+    display:inline-flex; align-items:center; justify-content:center;
+    width:20px; height:20px; border-radius:50%; color:#7380ec; font-size:18px;
+  }
+</style>
+@endpush
