@@ -86,3 +86,8 @@ Route::get('/salir', function (Request $request) {
     }
     return redirect('/');
 })->name('salir.get');
+
+
+Route::get('/login', function () {
+    return redirect('/?login=1');
+})->name('login');

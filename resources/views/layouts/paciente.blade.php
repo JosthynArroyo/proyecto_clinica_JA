@@ -1,3 +1,4 @@
+{{-- resources/views/layouts/paciente.blade.php --}}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -11,10 +12,10 @@
     @stack('head')
 </head>
 <body class="paciente-body @yield('body-class')">
-    @php($hasRight = View::hasSection('right'))
+    @php($hasRight = $__env->hasSection('right'))
     @php($user = Auth::user())
 
-    <div class="container paciente-container{{ $hasRight ? ' has-right' : '' }}">
+    <div class="container paciente-container {{ $hasRight ? 'has-right' : 'has-no-right' }}">
         @include('paciente.partials.sidebar')
 
         <div class="layout-content">
@@ -22,27 +23,29 @@
                 @yield('main')
             </main>
 
-            <div class="right">
-                <div class="top">
-                    <button id="menu_bar"><span class="material-symbols-sharp">menu</span></button>
-                    <div class="theme-toggler">
-                        <span class="material-symbols-sharp active">light_mode</span>
-                        <span class="material-symbols-sharp">dark_mode</span>
-                    </div>
-                    <div class="profile">
-                        <div class="info">
-                            <p><b>{{ $user?->name ?? 'Paciente' }}</b></p>
-                            <p>Panel Personal</p>
+            {{-- Renderizar panel derecho SOLO si la vista define @section('right') --}}
+            @if($hasRight)
+                <div class="right">
+                    <div class="top">
+                        <button id="menu_bar"><span class="material-symbols-sharp">menu</span></button>
+                        <div class="theme-toggler">
+                            <span class="material-symbols-sharp active">light_mode</span>
+                            <span class="material-symbols-sharp">dark_mode</span>
                         </div>
-                        <div class="profile-photo">
-                            <img src="{{ $user && $user->avatar ? asset('storage/'.$user->avatar) : asset('img/paciente1.jpg') }}" alt="Foto del paciente">
+                        <div class="profile">
+                            <div class="info">
+                                <p><b>{{ $user?->name ?? 'Paciente' }}</b></p>
+                                <p>Panel Personal</p>
+                            </div>
+                            <div class="profile-photo">
+                                <img src="{{ $user && $user->avatar ? asset('storage/'.$user->avatar) : asset('img/paciente1.jpg') }}" alt="Foto del paciente">
+                            </div>
                         </div>
                     </div>
-                </div>
-                @if($hasRight)
+
                     @yield('right')
-                @endif
-            </div>
+                </div>
+            @endif
         </div>
     </div>
 

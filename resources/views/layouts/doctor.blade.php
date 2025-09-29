@@ -23,30 +23,31 @@
                 @yield('content')
             </main>
 
-            <div class="right">
-                <div class="top">
-                    <button id="menu_bar">
-                        <span class="material-symbols-sharp">menu</span>
-                    </button>
-                    <div class="theme-toggler">
-                        <span class="material-symbols-sharp active">light_mode</span>
-                        <span class="material-symbols-sharp">dark_mode</span>
-                    </div>
-                    <div class="profile">
-                        <div class="info">
-                            <p><b>{{ $user?->name ?? 'Usuario' }}</b></p>
-                            <p>Panel Médico</p>
+            {{-- Mostrar el panel derecho SOLO si la vista define @section('right') --}}
+            @if($hasRight)
+                <div class="right">
+                    <div class="top">
+                        <button id="menu_bar">
+                            <span class="material-symbols-sharp">menu</span>
+                        </button>
+                        <div class="theme-toggler">
+                            <span class="material-symbols-sharp active">light_mode</span>
+                            <span class="material-symbols-sharp">dark_mode</span>
                         </div>
-                        <div class="profile-photo">
-                            <img src="{{ $user && $user->avatar ? asset('storage/' . $user->avatar) : asset('img/doctor1.jpg') }}" alt="Foto del doctor">
+                        <div class="profile">
+                            <div class="info">
+                                <p><b>{{ $user?->name ?? 'Usuario' }}</b></p>
+                                <p>Panel Médico</p>
+                            </div>
+                            <div class="profile-photo">
+                                <img src="{{ $user && $user->avatar ? asset('storage/' . $user->avatar) : asset('img/doctor1.jpg') }}" alt="Foto del doctor">
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                @if($hasRight)
                     @yield('right')
-                @endif
-            </div>
+                </div>
+            @endif
         </div>
     </div>
 

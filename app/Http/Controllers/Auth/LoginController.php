@@ -18,6 +18,12 @@ class LoginController extends Controller
         $this->middleware('auth')->only('logout');
     }
 
+    // >>> Evitar ver la pantalla /login y usar el modal del home
+    protected function showLoginForm()
+    {
+        return redirect('/?login=1');
+    }
+
     protected function validateLogin(Request $request)
     {
         $request->validate(
