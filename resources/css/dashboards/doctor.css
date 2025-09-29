@@ -61,15 +61,35 @@ body {
   display: grid;
   width: 96%;
   gap: 1.8rem;
-  grid-template-columns: 14rem auto 14rem;
+  grid-template-columns: 14rem minmax(0, 1fr);
   margin: 0 auto;
 }
 
-.container.has-no-right {
-  grid-template-columns: 14rem auto;
+.dashboard-container .layout-content {
+  display: flex;
+  flex: 1 1 auto;
+  gap: 1.8rem;
+  align-items: flex-start;
+  min-width: 0;
 }
-.container.has-right {
-  grid-template-columns: 14rem auto 14rem;
+
+.dashboard-container .layout-content > main {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.dashboard-container .layout-content > .right {
+  min-width: 16rem;
+  flex: 0 0 18rem;
+}
+
+.dashboard-container.has-no-right .layout-content{
+  flex-wrap: wrap;
+}
+.dashboard-container.has-no-right .layout-content > .right{
+  flex: 0 0 auto;
+  width: min(20rem, 100%);
+  margin-left: auto;
 }
 
 a {
@@ -401,6 +421,9 @@ main .recent_order a {
 /*Seccion nueva*/
 .right {
   margin-top: 1.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
 }
 
 .right h2 {
@@ -556,7 +579,12 @@ main .recent_order a {
 @media screen and (max-width:1200px) {
     .container{
         width: 94%;
-        grid-template-columns: 7rem auto 14rem;
+        grid-template-columns: 7rem minmax(0, 1fr);
+    }
+
+    .dashboard-container .layout-content > .right{
+        min-width: 14rem;
+        flex: 0 0 14rem;
     }
 
     aside .sidebar h3{
@@ -581,7 +609,16 @@ Media Query for Phoens
 @media screen and (max-width:768px) {
     .container{
         width: 100%;
-        grid-template-columns: repeat(1,1fr);
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard-container .layout-content{
+        flex-direction: column;
+    }
+    .dashboard-container .layout-content > .right{
+        min-width: 0;
+        width: 100%;
+        margin-left: 0;
     }
 
     aside{

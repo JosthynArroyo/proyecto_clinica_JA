@@ -85,22 +85,6 @@
     </div>
 @endsection
 @section('right')
-    <div class="top">
-        <button id="menu_bar"><span class="material-symbols-sharp">menu</span></button>
-        <div class="theme-toggler">
-            <span class="material-symbols-sharp active">light_mode</span>
-            <span class="material-symbols-sharp">dark_mode</span>
-        </div>
-        <div class="profile">
-            <div class="info">
-                <p><b>{{ $user->name }}</b></p>
-                <p>Panel Personal</p>
-            </div>
-            <div class="profile-photo">
-                <img src="{{ $user->avatar ? asset('storage/'.$user->avatar) : asset('img/paciente1.jpg') }}" alt="Foto del paciente">
-            </div>
-        </div>
-    </div>
     <div class="recent_updates">
         <h2>Actualizaciones</h2>
         <div class="updates"></div>

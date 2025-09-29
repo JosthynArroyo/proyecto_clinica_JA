@@ -276,7 +276,7 @@
                         </div>
                     </div>
                 </div>
-                <form method="POST" action="{{ route('paciente.actualizar-cita', $cita->id) }}">
+                <form method="POST" action="{{ route('paciente.editar-cita.update', $cita->id) }}">
                     @csrf
                     @method('PUT')
                     <div class="form-grid">

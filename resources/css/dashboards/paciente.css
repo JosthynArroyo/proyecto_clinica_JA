@@ -61,23 +61,44 @@ body {
   display: grid;
   width: 96%;
   gap: 1.8rem;
-  grid-template-columns: 14rem auto 14rem;
+  grid-template-columns: 14rem minmax(0, 1fr);
   margin: 0 auto;
 }
 
 .paciente-container {
-  display: grid;
-  grid-template-columns: 14rem minmax(0, 1fr); /* Sidebar + contenido principal expandido */
-  width: 100%;
   min-height: 100vh;
 }
 
-.paciente-container.has-right {
-  display: grid;
-  grid-template-columns: 14rem minmax(0, 1fr) 14rem; /* Sidebar + contenido + panel derecho */
-  width: 100%;
-  min-height: 100vh;
+.paciente-container .layout-content {
+  display: flex;
+  flex: 1 1 auto;
+  gap: 1.8rem;
+  align-items: flex-start;
+  min-width: 0;
 }
+
+.paciente-container .layout-content > main {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.paciente-container .layout-content > .right {
+  flex: 0 0 18rem;
+  min-width: 16rem;
+}
+
+.paciente-container:not(.has-right) .layout-content{
+  flex-wrap: wrap;
+}
+
+.paciente-container:not(.has-right) .layout-content > .right{
+  flex: 0 0 auto;
+  width: min(20rem, 100%);
+  margin-left: auto;
+}
+
+.paciente-container:not
+
 a {
   color: var(--clr-dark);
 }
@@ -407,6 +428,9 @@ main .recent_order a {
 /*Seccion nueva*/
 .right {
   margin-top: 1.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
 }
 
 .right h2 {
@@ -560,9 +584,26 @@ main .recent_order a {
 
 /**Media query*/
 @media screen and (max-width:1200px) {
+    .container,.paciente-container, .paciente-container.has-right{
+        width: 94%; 
+    }
+
     .container{
         width: 94%;
-        grid-template-columns: 7rem auto 14rem;
+        grid-template-columns: 7rem minmax(0, 1fr);
+    }
+
+    .paciente-container .layout-content > .right{
+        flex: 0 0 14rem;
+        min-width: 14rem;
+    }
+
+    .paciente-container{
+        grid-template-columns: 7rem minmax(0, 1fr);
+    }
+
+    .paciente-container.has-right{
+        grid-template-columns: 7rem minmax(0, 1fr) 14rem;
     }
 
     aside .sidebar h3{
@@ -585,9 +626,19 @@ Media Query for Phoens
 *********************** */
 
 @media screen and (max-width:768px) {
-    .container{
+    .container,.paciente-container, .paciente-container.has-right{
         width: 100%;
         grid-template-columns: repeat(1,1fr);
+    }
+
+    .paciente-container .layout-content{
+        flex-direction: column;
+    }
+
+    .paciente-container .layout-content > .right{
+        min-width: 0;
+        width: 100%;
+        margin-left: 0;
     }
 
     aside{

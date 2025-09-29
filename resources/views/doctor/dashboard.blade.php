@@ -97,24 +97,6 @@
     </div>
 @endsection
 @section('right')
-    <div class="top">
-        <button id="menu_bar">
-            <span class="material-symbols-sharp">menu</span>
-        </button>
-        <div class="theme-toggler">
-            <span class="material-symbols-sharp active">light_mode</span>
-            <span class="material-symbols-sharp">dark_mode</span>
-        </div>
-        <div class="profile">
-            <div class="info">
-                <p><b>{{ Auth::user()->name }}</b></p>
-                <p>Panel Médico</p>
-            </div>
-            <div class="profile-photo">
-                <img src="{{ Auth::user()->avatar ? asset('storage/' . Auth::user()->avatar) : asset('img/doctor1.jpg') }}" alt="Foto del doctor">
-            </div>
-        </div>
-    </div>
     <div class="recent_updates">
         <h2>Actividad Reciente</h2>
         <div class="updates" id="updates"></div>

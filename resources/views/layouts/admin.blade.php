@@ -11,8 +11,10 @@
   @vite(['resources/css/dashboards/admin.css', 'resources/js/dashboard-admin.js', 'resources/js/dashboard-admin-extras.js'])
   @stack('head')
 </head>
+
+@php($hasRight = View::hasSection('right'))
 <body>
-<div class="container">
+<div class="container{{ $hasRight ? '' : ' no-right' }}">
   <aside>
     <div class="top">
       <div class="logo">
@@ -56,34 +58,33 @@
     </div>
   </aside>
 
- 
   <main>
     @yield('main')  
   </main>
 
+  @if($hasRight)
+    <div class="right">
+      <div class="top">
+        <button id="menu_bar"><span class="material-symbols-sharp">menu</span></button>
+        <div class="theme-toggler">
+          <span class="material-symbols-sharp active">light_mode</span>
+          <span class="material-symbols-sharp">dark_mode</span>
+        </div>
+        <div class="profile">
+          <div class="info">
+            <p><b>{{ Auth::user()->name ?? 'Admin' }}</b></p>
+            <p>Panel Clínico</p>
+          </div>
+          <div class="profile-photo">
+            <img src="{{ Auth::user()->avatar ? asset('storage/'.Auth::user()->avatar) : asset('img/doctor1.jpg') }}" alt="Foto">
+          </div>
+        </div>
+      </div>
 
-  <div class="right">
-    <div class="top">
-      <button id="menu_bar"><span class="material-symbols-sharp">menu</span></button>
-      <div class="theme-toggler">
-        <span class="material-symbols-sharp active">light_mode</span>
-        <span class="material-symbols-sharp">dark_mode</span>
-      </div>
-      <div class="profile">
-        <div class="info">
-          <p><b>{{ Auth::user()->name ?? 'Admin' }}</b></p>
-          <p>Panel Clínico</p>
-        </div>
-        <div class="profile-photo">
-          <img src="{{ Auth::user()->avatar ? asset('storage/'.Auth::user()->avatar) : asset('img/doctor1.jpg') }}" alt="Foto">
-        </div>
-      </div>
+      @yield('right')
     </div>
-
-    @yield('right') 
-  </div>
+  @endif
 </div>
-
 
 @stack('scripts')
 </body>

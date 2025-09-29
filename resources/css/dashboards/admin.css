@@ -65,6 +65,8 @@ body {
   margin: 0 auto;
 }
 
+.container.no-right { grid-template-columns: 14rem auto; }
+
 a { color: var(--clr-dark); }
 
 h1 { font-weight: 800; font-size: 1.8rem; }
@@ -312,6 +314,7 @@ main .recent_order a { text-align: center; display: block; margin: 1rem; }
 /**Media query*/
 @media screen and (max-width:1200px) {
     .container{ width: 94%; grid-template-columns: 7rem auto 14rem; }
+    .container.no-right { grid-template-columns: 7rem auto; }
     aside .sidebar h3{ display: none; }
     aside .sidebar a:last-child{ position: relative; margin-top: 1.8rem; }
     main .insights{ display: grid; grid-template-columns: repeat(1,1fr); }
