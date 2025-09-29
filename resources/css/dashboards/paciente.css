@@ -65,6 +65,19 @@ body {
   margin: 0 auto;
 }
 
+.paciente-container {
+  display: grid;
+  grid-template-columns: 14rem minmax(0, 1fr); /* Sidebar + contenido principal expandido */
+  width: 100%;
+  min-height: 100vh;
+}
+
+.paciente-container.has-right {
+  display: grid;
+  grid-template-columns: 14rem minmax(0, 1fr) 14rem; /* Sidebar + contenido + panel derecho */
+  width: 100%;
+  min-height: 100vh;
+}
 a {
   color: var(--clr-dark);
 }

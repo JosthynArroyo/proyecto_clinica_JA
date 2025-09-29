@@ -11,17 +11,18 @@
     @stack('head')
 </head>
 <body class="paciente-body @yield('body-class')">
-<div class="container paciente-container">
-    @include('paciente.partials.sidebar')
-    <main>
-        @yield('main')
-    </main>
-    @hasSection('right')
-        <div class="right">
-            @yield('right')
-        </div>
-    @endif
-</div>
-@stack('scripts')
+    @php($hasRight = View::hasSection('right'))
+    <div class="container paciente-container{{ $hasRight ? ' has-right' : '' }}">
+        @include('paciente.partials.sidebar')
+        <main>
+            @yield('main')
+        </main>
+        @if($hasRight)
+            <div class="right">
+                @yield('right')
+            </div>
+        @endif
+    </div>
+    @stack('scripts')
 </body>
 </html>

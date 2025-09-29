@@ -60,7 +60,6 @@
                 <th>Fecha</th>
                 <th>Hora</th>
                 <th>Estado</th>
-                <th>Acción</th>
             </tr>
             </thead>
             <tbody>
@@ -74,9 +73,6 @@
                         <span class="badge {{ $cita->estado === 'pendiente' ? 'warning' : ($cita->estado === 'realizada' ? 'success' : ($cita->estado === 'confirmada' ? 'info' : 'danger')) }}">
                             {{ ucfirst($cita->estado) }}
                         </span>
-                    </td>
-                    <td>
-                        <a href="{{ route('paciente.editar-cita', $cita->id) }}" class="btn btn-primary btn-sm">Ver / Editar</a>
                     </td>
                 </tr>
             @empty
