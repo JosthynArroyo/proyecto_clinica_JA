@@ -3,143 +3,121 @@
 
 @push('head')
 <style>
-  /* ======== LAYOUT DEL CONTENIDO ======== */
-  .users-wrap{
-    width:100%;
-    margin: 96px clamp(16px,2vw,24px) 28px; /* lo bajé ~1cm aprox */
+  :root{
+    --usuarios-primary:#6366f1;
+    --usuarios-secondary:#22d3ee;
+    --usuarios-bg:#f8faff;
+    --usuarios-border:#e0e7ff;
+    --usuarios-muted:#6b7280;
+    --usuarios-dark:#0f172a;
   }
 
-  /* ======== CARD ======== */
-  .card{
-    width:100%;
-    background:#fff;
-    border:1px solid #d8e0ef;
-    border-radius:20px;
-    box-shadow:0 18px 32px rgba(15,23,42,.08);
-    overflow:hidden;
-  }
-  .card-header{
-    display:flex; align-items:center; justify-content:space-between;
-    padding:16px 18px;
-    border-bottom:1px solid #e6ecf7;
-    background:linear-gradient(180deg,#fafbff 0%, #ffffff 70%);
-  }
-  .card-header .title{ color:#64748b; font-weight:600 }
-  .total-badge{
-    background:#eef2ff; color:#4f46e5; border:1px solid #dbe2ff;
-    border-radius:999px; padding:.25rem .6rem; font-weight:700
-  }
+  body{background:radial-gradient(1600px 520px at 50% -30%,#eef2ff 0%,#ffffff 55%);} 
 
-  /* ======== TABLA: LÍNEAS RECTA + ANCHO REAL ======== */
-  table.users{
-    width:100%;
-    border-collapse:collapse;    /* un solo borde: recto y limpio */
-    table-layout:fixed;          /* respeta el colgroup */
-    background:#fff;
+  .users-page{width:min(1240px,100%);margin:96px auto 40px;padding:0 24px 60px;display:grid;gap:28px;}
+
+  .intro{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:1.5rem;padding:28px 32px;border-radius:26px;background:linear-gradient(120deg,rgba(99,102,241,.12),rgba(34,211,238,.18));border:1px solid var(--usuarios-border);box-shadow:0 24px 44px rgba(15,23,42,.08);}
+  .intro h2{margin:0;font-size:2.1rem;font-weight:800;color:var(--usuarios-dark);} 
+  .intro p{margin:.6rem 0 0;max-width:48ch;color:var(--usuarios-muted);font-weight:500;}
+  .intro-badges{display:flex;flex-wrap:wrap;gap:.75rem;}
+  .badge{display:inline-flex;align-items:center;gap:.55rem;padding:.6rem 1.1rem;border-radius:999px;font-weight:700;background:rgba(99,102,241,.15);color:var(--usuarios-dark);border:1px solid rgba(99,102,241,.25);} 
+  .badge .material-symbols-outlined{font-variation-settings:'FILL' 1,'wght' 600,'GRAD' 0,'opsz' 24;color:var(--usuarios-primary);} 
+
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:18px;}
+  .stat-card{background:#fff;border-radius:20px;border:1px solid var(--usuarios-border);padding:18px 20px;box-shadow:0 20px 32px rgba(15,23,42,.06);}
+  .stat-card h3{margin:0;font-size:1.9rem;font-weight:800;color:var(--usuarios-dark);} 
+  .stat-card span{display:flex;align-items:center;gap:.4rem;margin-top:6px;color:var(--usuarios-muted);font-weight:600;font-size:.95rem;}
+
+  .users-card{background:#fff;border-radius:24px;border:1px solid var(--usuarios-border);box-shadow:0 26px 42px rgba(15,23,42,.08);overflow:hidden;}
+  .users-card__header{padding:1.6rem 2rem;display:flex;flex-wrap:wrap;gap:1.4rem;justify-content:space-between;align-items:center;background:linear-gradient(180deg,#f7f9ff 0%,#ffffff 80%);border-bottom:1px solid var(--usuarios-border);} 
+  .users-card__header h3{margin:0;font-size:1.35rem;font-weight:800;color:var(--usuarios-dark);} 
+  .users-card__header span{color:var(--usuarios-muted);font-size:.95rem;}
+
+  .toolbar{display:flex;flex-wrap:wrap;gap:.75rem;align-items:center;}
+  .toolbar .input{height:42px;padding:0 1rem;border-radius:14px;border:1.5px solid var(--usuarios-border);background:#f8faff;font-weight:600;color:var(--usuarios-dark);} 
+  .toolbar .input:focus{outline:none;border-color:var(--usuarios-primary);box-shadow:0 0 0 5px rgba(99,102,241,.18);background:#fff;} 
+  .toolbar .btn{height:42px;padding:0 1.1rem;border-radius:14px;border:none;font-weight:700;display:inline-flex;align-items:center;gap:.4rem;cursor:pointer;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;box-shadow:0 18px 28px rgba(99,102,241,.25);} 
+
+  table.users{width:100%;border-collapse:separate;border-spacing:0 10px;padding:1.8rem;}
+  table.users thead th{padding:0 12px 12px;color:var(--usuarios-muted);font-weight:700;font-size:.88rem;text-transform:uppercase;text-align:left;letter-spacing:.04em;}
+  table.users tbody tr{background:#f9f9ff;border-radius:18px;box-shadow:0 12px 22px rgba(15,23,42,.06);} 
+  table.users tbody tr td{padding:18px 16px;background:transparent;border:none;vertical-align:top;}
+  table.users tbody tr td:first-child{border-top-left-radius:18px;border-bottom-left-radius:18px;}
+  table.users tbody tr td:last-child{border-top-right-radius:18px;border-bottom-right-radius:18px;}
+
+  .user-name{font-weight:700;color:var(--usuarios-dark);font-size:1.02rem;margin-bottom:.35rem;}
+  .user-id{font-size:.82rem;color:var(--usuarios-muted);font-weight:600;}
+  .chips{display:flex;flex-wrap:wrap;gap:.35rem;}
+  .chip{background:rgba(99,102,241,.16);border-radius:999px;padding:.2rem .7rem;color:#3730a3;font-size:.78rem;font-weight:700;border:1px solid rgba(99,102,241,.24);} 
+  .help{font-size:.82rem;color:var(--usuarios-muted);margin-top:6px;}
+
+  .input,.select{width:100%;height:46px;border-radius:14px;border:1.5px solid var(--usuarios-border);background:#ffffff;color:var(--usuarios-dark);padding:0 1rem;font-weight:600;transition:border .15s,box-shadow .15s;} 
+  .input:focus,.select:focus{outline:none;border-color:var(--usuarios-primary);box-shadow:0 0 0 5px rgba(99,102,241,.18);} 
+
+  .actions{display:flex;gap:.5rem;justify-content:flex-end;flex-wrap:wrap;}
+  .btn{display:inline-flex;gap:.45rem;align-items:center;border:0;border-radius:14px;padding:.65rem 1rem;font-weight:700;cursor:pointer;transition:transform .05s,filter .2s,box-shadow .2s;}
+  .btn:active{transform:translateY(1px) scale(.995);} 
+  .btn-primary{background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;box-shadow:0 18px 28px rgba(99,102,241,.25);} 
+  .btn-outline{background:#fff;border:1.5px solid var(--usuarios-border);color:var(--usuarios-dark);} 
+
+  .alert{padding:1rem 1.2rem;border-radius:16px;margin:1.2rem 2rem 0;font-weight:600;border:1px solid transparent;}
+  .alert-success{background:#ecfdf5;border-color:#bbf7d0;color:#047857;}
+  .alert-error{background:#fff0f2;border-color:#fecdd3;color:#9f1239;}
+
+  .users-card__footer{display:flex;justify-content:space-between;flex-wrap:wrap;gap:1rem;align-items:center;padding:1rem 2rem 1.4rem;color:var(--usuarios-muted);font-weight:600;}
+
+  tbody tr:hover td{background:rgba(99,102,241,.06);}
+
+  @media (max-width:960px){
+    table.users thead{display:none;}
+    table.users{border-spacing:0 16px;padding:1.2rem;}
+    table.users tbody tr{display:block;}
+    table.users tbody tr td{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;}
+    table.users tbody tr td::before{content:attr(data-label);font-weight:700;color:var(--usuarios-muted);margin-right:16px;text-transform:uppercase;font-size:.75rem;}
+    .actions{justify-content:flex-start;width:100%;}
   }
-  /* proporciones suman 100% */
-  table.users col.col-nombre{ width: 18%; }
-  table.users col.col-correo{ width: 32%; }
-  table.users col.col-rol{    width: 12%; }
-  table.users col.col-esps{   width: 28%; }
-  table.users col.col-acts{   width: 10%; }
-
-  table.users thead th{
-    background:#fafbff;
-    color:#0f172a;
-    font-weight:800;
-    font-size:.95rem;
-    text-align:left;
-    padding:14px 12px;
-    border:1.5px solid #d6dfef; /* MISMO borde en th/td → separadores perfectos */
-    white-space:nowrap;
-  }
-
-  table.users tbody td{
-    padding:12px;
-    border:1.5px solid #d6dfef; /* MISMO borde */
-    vertical-align:top;
-    background:#fff;
-  }
-
-  /* Columna acciones centrada y con ancho mínimo suficiente */
-  table.users thead th:nth-last-child(1),
-  table.users tbody td:nth-last-child(1){
-    text-align:center;
-    min-width:160px;
-  }
-
-  /* ======== CONTROLES UNIFORMES ======== */
-  .input,.select{
-    width:100%; height:44px;
-    border-radius:12px;
-    background:#fbfcfe; color:#0f172a; padding:0 .85rem;
-    border:1.6px solid #ccd5e5;
-    line-height:44px;
-  }
-  .input:focus,.select:focus{
-    outline:none; border-color:#7380ec; box-shadow:0 0 0 4px rgba(115,128,236,.18);
-  }
-
-  .chip{
-    display:inline-block;
-    margin:0 8px 8px 0;
-    background:#eef2ff; border:1px solid #d5dcff;
-    color:#3949ab; border-radius:999px; padding:.12rem .55rem;
-    font-size:.8rem; font-weight:600;
-    white-space:nowrap;
-  }
-  .help{ font-size:.82rem; color:#7a859f; margin-top:6px }
-
-  .actions{ display:flex; justify-content:center; align-items:center; gap:.5rem }
-  .btn{ display:inline-flex; gap:.45rem; align-items:center; border:0;
-        border-radius:12px; padding:.65rem 1rem; font-weight:700; cursor:pointer }
-  .btn-primary{ background:#7380ec; color:#fff }
-  .btn-outline{ background:#fff; border:1.5px solid #e0e6f2; color:#424b5f }
-
-  .alert{ padding:.85rem 1rem; border-radius:12px; margin:12px 16px 0; border:1px solid }
-  .alert-success{ background:#ecfdf5; border-color:#a7f3d0; color:#065f46 }
-  .alert-error{ background:#fff1f2; border-color:#fecdd3; color:#9f1239 }
-
-  .card-footer{
-    display:flex; justify-content:flex-end; gap:.5rem; align-items:center;
-    color:#7d8da1; padding:10px 16px 16px;
-  }
-
-  /* ======== HOVER / LEGIBILIDAD ======== */
-  tbody tr:hover td{ background:#fbfdff }
-
-  /* ======== RESPONSIVE ======== */
-  @media (max-width: 980px){
-    table.users col.col-esps{ width: 24% }
-    table.users col.col-correo{ width: 36% }
-  }
-  @media (max-width: 780px){
-    .card-header{ flex-direction:column; gap:.5rem; align-items:flex-start }
-    thead{ display:none }
-    table.users, tbody, tr, td{ display:block; width:100% }
-    tbody tr{ border-top:1px solid #e6ecf7 }
-    tbody td{ border-left:0; border-right:0 }
-    tbody td::before{
-      content: attr(data-label);
-      display:block; font-weight:700; color:#334155; margin-bottom:6px
-    }
-    table.users col{ width:auto }
-    .actions{ justify-content:flex-start }
-  }
-
-  /* Evita scroll horizontal accidental */
-  html,body{ overflow-x:hidden; }
 </style>
 @endpush
 
 @section('main')
-<div class="users-wrap">
+@php
+  $collection = $users->getCollection();
+  $resumenRoles = $collection->groupBy(fn($item) => optional($item->roles->first())->name ?? 'Sin rol')->map->count();
+@endphp
 
-  <div class="card">
-    <div class="card-header">
-      <div class="title">Edita los datos y pulsa <b>Guardar</b>.</div>
-      <span class="total-badge">Total: {{ $users->total() }}</span>
+<div class="users-page">
+  <section class="intro">
+    <div>
+      <h2>Gestión de usuarios</h2>
+      <p>Administra la información de doctores, pacientes y coordinadores desde un único lugar. Actualiza los datos y confirma con <strong>Guardar</strong>.</p>
+    </div>
+    <div class="intro-badges">
+      <span class="badge"><span class="material-symbols-outlined">group</span>Total: {{ $users->total() }}</span>
+      <span class="badge" style="background:rgba(34,211,238,.18);border-color:rgba(34,211,238,.35);"><span class="material-symbols-outlined">verified</span>Datos verificados</span>
+    </div>
+  </section>
+
+  <section class="stats">
+    @foreach($resumenRoles as $rolNombre => $cantidad)
+      <article class="stat-card">
+        <h3>{{ $cantidad }}</h3>
+        <span><span class="material-symbols-outlined" style="color:var(--usuarios-primary);font-size:1.1rem;">shield_person</span> {{ ucfirst($rolNombre) }}</span>
+      </article>
+    @endforeach
+  </section>
+
+  <div class="users-card">
+    <div class="users-card__header">
+      <div>
+        <h3>Usuarios registrados</h3>
+        <span>Edita cualquier información y confirma para guardar los cambios.</span>
+      </div>
+      <div class="toolbar">
+        <form method="GET" action="{{ url()->current() }}" style="display:flex;gap:.75rem;flex-wrap:wrap;align-items:center;">
+          <input class="input" type="search" name="buscar" value="{{ request('buscar') }}" placeholder="Buscar por nombre o correo">
+          <button class="btn" type="submit"><span class="material-symbols-outlined">search</span> Buscar</button>
+        </form>
+      </div>
     </div>
 
     @if ($errors->any())
@@ -152,18 +130,10 @@
     @endif
 
     <table class="users">
-      <colgroup>
-        <col class="col-nombre">
-        <col class="col-correo">
-        <col class="col-rol">
-        <col class="col-esps">
-        <col class="col-acts">
-      </colgroup>
-
       <thead>
         <tr>
-          <th>Nombre</th>
-          <th>Correo</th>
+          <th>Usuario</th>
+          <th>Contacto</th>
           <th>Rol</th>
           <th>Especialidades</th>
           <th>Acciones</th>
@@ -174,6 +144,7 @@
       @foreach($users as $u)
         @php
           $roleIdActual = optional($u->roles->first())->id;
+          $roleNombre = optional($u->roles->first())->name;
           $esAdmin = $u->roles->contains(fn($rr)=>$rr->name==='administrador');
           $espNombres = ($u->especialidades ?? collect())->pluck('nombre')->all();
         @endphp
@@ -184,13 +155,15 @@
         @endunless
 
         <tr>
-          <td data-label="Nombre">
-            <input class="input" form="update-{{ $u->id }}" type="text" name="name"
-                   value="{{ old('name_'.$u->id, $u->name) }}" required>
-            <div class="help">ID: {{ $u->id }}</div>
+          <td data-label="Usuario">
+            <div class="user-name">
+              <input class="input" form="update-{{ $u->id }}" type="text" name="name"
+                     value="{{ old('name_'.$u->id, $u->name) }}" required>
+            </div>
+            <div class="user-id">ID: {{ $u->id }}</div>
           </td>
 
-          <td data-label="Correo">
+          <td data-label="Contacto">
             <input class="input" form="update-{{ $u->id }}" type="email" name="email"
                    value="{{ old('email_'.$u->id, $u->email) }}" required>
           </td>
@@ -210,9 +183,11 @@
 
           <td data-label="Especialidades">
             @if(count($espNombres))
-              @foreach($espNombres as $n)
-                <span class="chip">{{ $n }}</span>
-              @endforeach
+              <div class="chips">
+                @foreach($espNombres as $n)
+                  <span class="chip">{{ $n }}</span>
+                @endforeach
+              </div>
             @else
               <div class="help">—</div>
             @endif
@@ -236,13 +211,16 @@
       </tbody>
     </table>
 
-    <div class="card-footer">
-      @if ($users->hasPages())
-        <div>Página {{ $users->currentPage() }} de {{ $users->lastPage() }}</div>
-      @endif
+    <div class="users-card__footer">
+      <div>
+        @if ($users->hasPages())
+          Página {{ $users->currentPage() }} de {{ $users->lastPage() }}
+        @else
+          Mostrando {{ $users->count() }} registros
+        @endif
+      </div>
       {!! $users->withQueryString()->links() !!}
     </div>
   </div>
-
 </div>
 @endsection
