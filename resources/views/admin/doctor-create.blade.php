@@ -1,47 +1,47 @@
 @extends('layouts.admin')
 @section('title','Crear doctor | Admin')
-
 @push('head')
 <style>
   :root{
-    --doctor-primary:#0ea5e9;
-    --doctor-border:#bae6fd;
+    --doctor-primary:#1d4ed8;
+    --doctor-primary-soft:rgba(29,78,216,.08);
+    --doctor-border:#e2e8f0;
     --doctor-muted:#64748b;
     --doctor-dark:#0f172a;
   }
   body{
-    background:radial-gradient(1400px 480px at 75% -18%,#e0f2fe 0%,#ffffff 60%);
+    background:#f5f7fb;
   }
   .page{width:min(1040px,100%);margin:2.6rem auto;padding:0 1.4rem 3rem;}
-  .hero{display:flex;flex-wrap:wrap;gap:1.4rem;justify-content:space-between;align-items:flex-end;margin-bottom:1.8rem;}
+  .hero{display:flex;flex-wrap:wrap;gap:1.4rem;justify-content:space-between;align-items:flex-end;margin-bottom:1.8rem;background:#ffffff;border-radius:24px;padding:24px 28px;border:1px solid var(--doctor-border);box-shadow:0 18px 38px rgba(15,23,42,.08);animation:fadeSlideUp .55s ease both;}
   .hero h2{margin:0;font-size:2.1rem;font-weight:800;color:var(--doctor-dark);}
   .hero p{margin:.4rem 0 0;max-width:36ch;color:var(--doctor-muted);font-weight:500;}
-  .hero-stat{display:flex;align-items:center;gap:.6rem;background:rgba(14,165,233,.12);border:1px solid var(--doctor-border);padding:.7rem 1.1rem;border-radius:999px;font-weight:700;color:var(--doctor-dark);}
+  .hero-stat{display:flex;align-items:center;gap:.6rem;background:var(--doctor-primary-soft);border:1px solid var(--doctor-border);padding:.7rem 1.1rem;border-radius:999px;font-weight:700;color:var(--doctor-dark);animation:fadeIn .6s ease both;}
   .hero-stat .material-symbols-outlined{color:var(--doctor-primary);font-variation-settings:'FILL' 1,'wght' 600,'GRAD' 0,'opsz' 24;}
   .alerts{display:grid;gap:1rem;margin-bottom:1.2rem;}
   .alert{border-radius:16px;padding:1rem 1.2rem;font-weight:600;}
   .alert.success{background:#ecfdf5;border:1px solid #bbf7d0;color:#047857;}
   .alert.error{background:#fff0f6;border:1px solid #fbcfe8;color:#9f1239;}
-  .card{background:#fff;border-radius:24px;border:1px solid #e0f2fe;box-shadow:0 32px 44px rgba(15,23,42,.08);overflow:hidden;}
-  .card-header{padding:1.6rem 2rem;background:linear-gradient(180deg,#f0f9ff 0%,#ffffff 80%);border-bottom:1px solid #e0f2fe;display:flex;flex-wrap:wrap;gap:1.4rem;justify-content:space-between;align-items:center;}
+  .card{background:#fff;border-radius:24px;border:1px solid var(--doctor-border);box-shadow:0 26px 42px rgba(15,23,42,.08);overflow:hidden;animation:fadeSlideUp .6s ease both;}
+  .card-header{padding:1.6rem 2rem;background:#ffffff;border-bottom:1px solid var(--doctor-border);display:flex;flex-wrap:wrap;gap:1.4rem;justify-content:space-between;align-items:center;}
   .card-header h3{margin:0;font-size:1.4rem;font-weight:800;color:var(--doctor-dark);}
   .card-header span{color:var(--doctor-muted);font-size:.95rem;}
   .card-body{padding:2rem;display:grid;gap:2rem;}
-  .section{border:1px dashed #cbd5f5;border-radius:18px;padding:1.6rem;background:#f7fbff;}
+  .section{border:1px dashed var(--doctor-border);border-radius:18px;padding:1.6rem;background:#f8faff;animation:fadeSlideUp .65s ease both;}
   .section-title{margin:0 0 1rem;font-size:1.05rem;font-weight:700;color:var(--doctor-dark);display:flex;align-items:center;gap:.6rem;}
   .section-title .material-symbols-outlined{color:var(--doctor-primary);font-variation-settings:'FILL' 1,'wght' 600,'GRAD' 0,'opsz' 24;}
   .grid{display:grid;gap:1.1rem 1.2rem;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));}
   label{display:block;margin-bottom:.45rem;font-weight:700;color:var(--doctor-dark);}
-  .input,.select{width:100%;height:48px;border-radius:14px;border:1.6px solid #cfe5fb;background:#f4f9ff;padding:0 1rem;font-weight:600;color:var(--doctor-dark);transition:border .15s,box-shadow .15s,background .15s;}
-  .input:focus,.select:focus{outline:none;border-color:var(--doctor-primary);box-shadow:0 0 0 6px rgba(14,165,233,.22);background:#fff;}
+  .input,.select{width:100%;height:48px;border-radius:14px;border:1.6px solid var(--doctor-border);background:#ffffff;padding:0 1rem;font-weight:600;color:var(--doctor-dark);transition:border .15s,box-shadow .15s,background .15s;}
+  .input:focus,.select:focus{outline:none;border-color:var(--doctor-primary);box-shadow:0 0 0 6px rgba(29,78,216,.16);background:#fff;}
   .input-wrap{position:relative;}
   .input-wrap .input{padding-right:2.6rem;}
   .toggle-visibility{position:absolute;right:.55rem;top:50%;transform:translateY(-50%);border:0;background:transparent;cursor:pointer;color:var(--doctor-primary);}
   .chips{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.75rem;}
-  .chip{position:relative;display:flex;align-items:center;gap:.6rem;border:1.5px solid #cfe5fb;border-radius:14px;background:#fff;padding:.75rem 1rem;cursor:pointer;transition:border .15s,box-shadow .15s,background .15s;}
-  .chip:hover{border-color:var(--doctor-primary);background:#f0f9ff;}
+  .chip{position:relative;display:flex;align-items:center;gap:.6rem;border:1.5px solid var(--doctor-border);border-radius:14px;background:#fff;padding:.75rem 1rem;cursor:pointer;transition:border .15s,box-shadow .15s,background .15s;animation:fadeIn .6s ease both;}
+  .chip:hover{border-color:var(--doctor-primary);background:var(--doctor-primary-soft);}
   .chip > input{position:absolute;inset:0;opacity:0;cursor:pointer;}
-  .chip:has(> input:checked){background:#e0f2fe;border-color:var(--doctor-primary);box-shadow:0 0 0 3px rgba(14,165,233,.18) inset;}
+  .chip:has(> input:checked){background:rgba(29,78,216,.12);border-color:var(--doctor-primary);box-shadow:0 0 0 3px rgba(29,78,216,.16) inset;}
   .chip:has(> input:checked)::before{content:"stethoscope";font-family:"Material Symbols Outlined";font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 24;color:var(--doctor-primary);}
   .chip::before{content:"radio_button_unchecked";font-family:"Material Symbols Outlined";font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;color:#94a3b8;}
   .error-text{margin-top:.45rem;color:#b91c1c;font-weight:600;}
@@ -49,14 +49,14 @@
   .card-footer{padding:0 2rem 2rem;display:flex;justify-content:flex-end;gap:.75rem;flex-wrap:wrap;}
   .btn{border:none;border-radius:14px;padding:.9rem 1.4rem;font-weight:800;cursor:pointer;transition:transform .05s,filter .2s,box-shadow .2s;}
   .btn:active{transform:translateY(1px) scale(.995);}
-  .btn-secondary{background:#f0f9ff;border:1px solid #bae6fd;color:var(--doctor-dark);}
-  .btn-primary{background:linear-gradient(135deg,#0ea5e9,#2563eb);color:#fff;box-shadow:0 22px 36px rgba(14,165,233,.28);}
+  .btn-secondary{background:#f8faff;border:1px solid var(--doctor-border);color:var(--doctor-dark);}
+  .btn-primary{background:var(--doctor-primary);color:#fff;box-shadow:0 22px 36px rgba(29,78,216,.22);}
+  .btn-primary:hover{filter:brightness(.95);}
   @media (max-width:760px){
     .card-header{flex-direction:column;align-items:flex-start;}
   }
 </style>
 @endpush
-
 @section('main')
   <div class="page">
     <div class="hero">
@@ -66,7 +66,6 @@
       </div>
       <span class="hero-stat"><span class="material-symbols-outlined">workspace_premium</span>Perfil profesional</span>
     </div>
-
     <div class="alerts">
       @if(session('success'))
         <div class="alert success">{{ session('success') }}</div>
@@ -77,7 +76,6 @@
         </div>
       @endif
     </div>
-
     <form id="form-crear-doctor" class="card" action="{{ route('admin.doctores.store') }}" method="POST" enctype="multipart/form-data" novalidate>
       @csrf
       <div class="card-header">
@@ -85,9 +83,8 @@
           <h3>Información del doctor</h3>
           <span>Verifica que los datos coincidan con la documentación entregada.</span>
         </div>
-        <span class="hero-stat" style="background:#e0f2fe;">1 solo formulario</span>
+        <span class="hero-stat" style="background:rgba(29,78,216,.12);border:1px solid var(--doctor-border);color:var(--doctor-primary);">1 solo formulario</span>
       </div>
-
       <div class="card-body">
         <section class="section">
           <h4 class="section-title"><span class="material-symbols-outlined">badge</span>Identificación</h4>
@@ -184,6 +181,14 @@
               </div>
               @error('especialidad_id')<div class="error-text">{{ $message }}</div>@enderror
               <div class="hint">Selecciona exactamente una especialidad.</div>
+            </div>
+            {{-- NUEVO: Precio de consulta (USD) --}}
+            <div>
+              <label>Precio de consulta (USD)</label>
+              <input class="input" type="number" step="0.01" min="0" name="precio_consulta" value="{{ old('precio_consulta') }}" placeholder="Ej: 25.00">
+              @error('precio_consulta')<div class="error-text">{{ $message }}</div>@enderror
+              <input type="hidden" name="moneda" value="USD">
+              <div class="hint">Moneda fija: USD (Ecuador).</div>
             </div>
           </div>
         </section>

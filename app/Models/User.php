@@ -22,6 +22,9 @@ class User extends Authenticatable
         'fecha_nacimiento',
         'sexo',
         'avatar',
+        // NUEVO:
+        'precio_consulta',
+        'moneda',
     ];
 
     protected $hidden = [
@@ -33,6 +36,8 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password'          => 'hashed',
         'fecha_nacimiento'  => 'date',
+        // NUEVO:
+        'precio_consulta'   => 'decimal:2',
     ];
 
     public function roles()
@@ -50,5 +55,4 @@ class User extends Authenticatable
         return $this->belongsToMany(Especialidad::class, 'doctor_especialidad', 'user_id', 'especialidad_id')
             ->withTimestamps();
     }
-
 }

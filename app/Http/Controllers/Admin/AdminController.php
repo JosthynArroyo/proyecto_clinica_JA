@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades.Hash;
 use App\Models\Cita;
 use App\Models\User;
 use App\Models\Role;
@@ -219,6 +219,10 @@ class AdminController extends Controller
 
             // SOLO UNA ESPECIALIDAD (obligatoria)
             'especialidad_id'  => ['required','integer','exists:especialidades,id'],
+
+            // NUEVO:
+            'precio_consulta'  => ['nullable','numeric','min:0','max:99999999.99'],
+            'moneda'           => ['nullable','in:USD'], // Ecuador -> USD fijo
         ];
 
         $messages = [
@@ -240,6 +244,10 @@ class AdminController extends Controller
             'dni.required'          => 'El número de cédula es obligatorio.',
             'dni.digits'            => 'El número de cédula debe tener exactamente 10 dígitos.',
             'dni.unique'            => 'Este número de cédula ya está registrado.',
+            // Nuevos
+            'precio_consulta.numeric' => 'El precio debe ser numérico.',
+            'precio_consulta.min'     => 'El precio no puede ser negativo.',
+            'moneda.in'               => 'Moneda inválida (fijo: USD).',
         ];
 
         $attributes = [
@@ -254,6 +262,9 @@ class AdminController extends Controller
             'sexo'                  => 'sexo',
             'avatar'                => 'foto',
             'especialidad_id'       => 'especialidad',
+            // Nuevos
+            'precio_consulta'       => 'precio de consulta',
+            'moneda'                => 'moneda',
         ];
 
         $validated = $request->validate($rules, $messages, $attributes);
@@ -268,6 +279,10 @@ class AdminController extends Controller
         $user->direccion = $validated['direccion'] ?? null;
         $user->fecha_nacimiento = $validated['fecha_nacimiento'] ?? null;
         $user->sexo = $validated['sexo'] ?? null;
+
+        // NUEVO:
+        $user->precio_consulta = $validated['precio_consulta'] ?? null;
+        $user->moneda = 'USD';
 
         if ($request->hasFile('avatar')) {
             $user->avatar = $request->file('avatar')->store('avatars', 'public');

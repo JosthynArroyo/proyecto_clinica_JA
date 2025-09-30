@@ -1,21 +1,26 @@
 @extends('layouts.doctor')
 @section('title', 'Panel Doctor - Clínica Los Ángeles')
 @section('activeSidebar', 'dashboard')
+
 @push('head')
     <meta name="doctor-dashboard-data" content="{{ route('doctor.dashboard.data') }}">
     <meta name="user-id" content="{{ Auth::id() }}">
 @endpush
+
 @push('scripts')
     @vite(['resources/js/dashboard-doctor.js'])
 @endpush
+
 @section('content')
     <h1>Panel del Doctor</h1>
     <div class="date">
-        <input type="date">
+        <input type="date" value="{{ now()->format('Y-m-d') }}">
     </div>
+
     @if(session('success'))
         <div class="alert success">{{ session('success') }}</div>
     @endif
+
     <div class="insights">
         <div class="sales">
             <span class="material-symbols-sharp">calendar_month</span>
@@ -66,6 +71,7 @@
             <small>Hoy</small>
         </div>
     </div>
+
     <div class="recent_order">
         <h1>Citas Recientes</h1>
         <table>
@@ -84,7 +90,7 @@
                         <td class="{{ $c->estado === 'pendiente' ? 'warning' : ($c->estado === 'realizada' ? 'success' : ($c->estado === 'confirmada' ? 'info' : 'danger')) }}">
                             {{ ucfirst($c->estado) }}
                         </td>
-                        <td>{{ $c->fecha }}</td>
+                        <td>{{ \Illuminate\Support\Carbon::parse($c->fecha)->format('d/m/Y') }}</td>
                         <td>{{ $c->hora }}</td>
                     </tr>
                 @empty
@@ -96,6 +102,7 @@
         </table>
     </div>
 @endsection
+
 @section('right')
     <div class="recent_updates">
         <h2>Actividad Reciente</h2>

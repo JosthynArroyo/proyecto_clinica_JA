@@ -14,7 +14,7 @@ class EspecialidadesSeeder extends Seeder
         Especialidad::truncate();
         Schema::enableForeignKeyConstraints();
 
-        Especialidad::create(['nombre' => 'Cardiología', 'descripcion' => 'Diagnóstico y tratamiento de enfermedades del corazón.']);
+        Especialidad::create(['nombre' => 'Odontología','descripcion' => 'Prevención, diagnóstico y tratamiento de problemas dentales y de salud bucal.']);
         Especialidad::create(['nombre' => 'Pediatría', 'descripcion' => 'Atención médica de niños y adolescentes.']);
         Especialidad::create(['nombre' => 'Dermatología', 'descripcion' => 'Salud de la piel, cabello y uñas.']);
         Especialidad::create(['nombre' => 'Medicina General', 'descripcion' => 'Atención primaria integral para adultos.']);

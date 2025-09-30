@@ -1,73 +1,65 @@
 @extends('layouts.admin')
 @section('title','Usuarios | Admin')
-
 @push('head')
 <style>
   :root{
-    --usuarios-primary:#6366f1;
-    --usuarios-secondary:#22d3ee;
-    --usuarios-bg:#f8faff;
-    --usuarios-border:#e0e7ff;
-    --usuarios-muted:#6b7280;
+    --usuarios-primary:#1d4ed8;
+    --usuarios-primary-soft:rgba(29,78,216,.08);
+    --usuarios-highlight:rgba(29,78,216,.12);
+    --usuarios-bg:#f5f7fb;
+    --usuarios-border:#e2e8f0;
+    --usuarios-muted:#64748b;
     --usuarios-dark:#0f172a;
   }
-
-  body{background:radial-gradient(1600px 520px at 50% -30%,#eef2ff 0%,#ffffff 55%);} 
-
+  body{background:var(--usuarios-bg);}
   .users-page{width:min(1240px,100%);margin:96px auto 40px;padding:0 24px 60px;display:grid;gap:28px;}
-
-  .intro{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:1.5rem;padding:28px 32px;border-radius:26px;background:linear-gradient(120deg,rgba(99,102,241,.12),rgba(34,211,238,.18));border:1px solid var(--usuarios-border);box-shadow:0 24px 44px rgba(15,23,42,.08);}
-  .intro h2{margin:0;font-size:2.1rem;font-weight:800;color:var(--usuarios-dark);} 
+  .intro{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:1.5rem;padding:28px 32px;border-radius:26px;background:#ffffff;border:1px solid var(--usuarios-border);box-shadow:0 18px 40px rgba(15,23,42,.08);animation:fadeSlideUp .55s ease both;}
+  .intro h2{margin:0;font-size:2.1rem;font-weight:800;color:var(--usuarios-dark);}
   .intro p{margin:.6rem 0 0;max-width:48ch;color:var(--usuarios-muted);font-weight:500;}
   .intro-badges{display:flex;flex-wrap:wrap;gap:.75rem;}
-  .badge{display:inline-flex;align-items:center;gap:.55rem;padding:.6rem 1.1rem;border-radius:999px;font-weight:700;background:rgba(99,102,241,.15);color:var(--usuarios-dark);border:1px solid rgba(99,102,241,.25);} 
-  .badge .material-symbols-outlined{font-variation-settings:'FILL' 1,'wght' 600,'GRAD' 0,'opsz' 24;color:var(--usuarios-primary);} 
-
+  .badge{display:inline-flex;align-items:center;gap:.55rem;padding:.6rem 1.1rem;border-radius:999px;font-weight:700;background:var(--usuarios-primary-soft);color:var(--usuarios-dark);border:1px solid var(--usuarios-border);animation:fadeIn .6s ease both;}
+  .intro-badges .badge:nth-child(2){animation-delay:.1s;}
+  .badge .material-symbols-outlined{font-variation-settings:'FILL' 1,'wght' 600,'GRAD' 0,'opsz' 24;color:var(--usuarios-primary);}
   .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:18px;}
-  .stat-card{background:#fff;border-radius:20px;border:1px solid var(--usuarios-border);padding:18px 20px;box-shadow:0 20px 32px rgba(15,23,42,.06);}
-  .stat-card h3{margin:0;font-size:1.9rem;font-weight:800;color:var(--usuarios-dark);} 
+  .stat-card{background:#fff;border-radius:20px;border:1px solid var(--usuarios-border);padding:18px 20px;box-shadow:0 18px 34px rgba(15,23,42,.08);animation:fadeSlideUp .6s ease both;}
+  .stat-card:nth-child(2){animation-delay:.1s;}
+  .stat-card:nth-child(3){animation-delay:.2s;}
+  .stat-card h3{margin:0;font-size:1.9rem;font-weight:800;color:var(--usuarios-dark);}
   .stat-card span{display:flex;align-items:center;gap:.4rem;margin-top:6px;color:var(--usuarios-muted);font-weight:600;font-size:.95rem;}
-
-  .users-card{background:#fff;border-radius:24px;border:1px solid var(--usuarios-border);box-shadow:0 26px 42px rgba(15,23,42,.08);overflow:hidden;}
-  .users-card__header{padding:1.6rem 2rem;display:flex;flex-wrap:wrap;gap:1.4rem;justify-content:space-between;align-items:center;background:linear-gradient(180deg,#f7f9ff 0%,#ffffff 80%);border-bottom:1px solid var(--usuarios-border);} 
-  .users-card__header h3{margin:0;font-size:1.35rem;font-weight:800;color:var(--usuarios-dark);} 
+  .users-card{background:#fff;border-radius:24px;border:1px solid var(--usuarios-border);box-shadow:0 22px 42px rgba(15,23,42,.08);overflow:hidden;animation:fadeSlideUp .7s ease both;}
+  .users-card__header{padding:1.6rem 2rem;display:flex;flex-wrap:wrap;gap:1.4rem;justify-content:space-between;align-items:center;background:#ffffff;border-bottom:1px solid var(--usuarios-border);}
+  .users-card__header h3{margin:0;font-size:1.35rem;font-weight:800;color:var(--usuarios-dark);}
   .users-card__header span{color:var(--usuarios-muted);font-size:.95rem;}
-
   .toolbar{display:flex;flex-wrap:wrap;gap:.75rem;align-items:center;}
-  .toolbar .input{height:42px;padding:0 1rem;border-radius:14px;border:1.5px solid var(--usuarios-border);background:#f8faff;font-weight:600;color:var(--usuarios-dark);} 
-  .toolbar .input:focus{outline:none;border-color:var(--usuarios-primary);box-shadow:0 0 0 5px rgba(99,102,241,.18);background:#fff;} 
-  .toolbar .btn{height:42px;padding:0 1.1rem;border-radius:14px;border:none;font-weight:700;display:inline-flex;align-items:center;gap:.4rem;cursor:pointer;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;box-shadow:0 18px 28px rgba(99,102,241,.25);} 
-
-  table.users{width:100%;border-collapse:separate;border-spacing:0 10px;padding:1.8rem;}
+  .toolbar .input{height:42px;padding:0 1rem;border-radius:14px;border:1.5px solid var(--usuarios-border);background:#ffffff;font-weight:600;color:var(--usuarios-dark);transition:border .2s,box-shadow .2s,background .2s;}
+  .toolbar .input:focus{outline:none;border-color:var(--usuarios-primary);box-shadow:0 0 0 5px rgba(29,78,216,.16);background:#fff;}
+  .toolbar .btn{height:42px;padding:0 1.1rem;border-radius:14px;border:none;font-weight:700;display:inline-flex;align-items:center;gap:.4rem;cursor:pointer;background:var(--usuarios-primary);color:#fff;box-shadow:0 18px 30px rgba(29,78,216,.22);transition:filter .2s;}
+  .toolbar .btn:hover{filter:brightness(.95);}
+  table.users{width:100%;border-collapse:separate;border-spacing:0 12px;padding:1.8rem;}
   table.users thead th{padding:0 12px 12px;color:var(--usuarios-muted);font-weight:700;font-size:.88rem;text-transform:uppercase;text-align:left;letter-spacing:.04em;}
-  table.users tbody tr{background:#f9f9ff;border-radius:18px;box-shadow:0 12px 22px rgba(15,23,42,.06);} 
+  table.users tbody tr{background:#ffffff;border-radius:18px;box-shadow:0 14px 28px rgba(15,23,42,.06);animation:fadeSlideUp .7s ease both;}
+  table.users tbody tr:nth-child(n+2){animation-delay:.05s;}
   table.users tbody tr td{padding:18px 16px;background:transparent;border:none;vertical-align:top;}
   table.users tbody tr td:first-child{border-top-left-radius:18px;border-bottom-left-radius:18px;}
   table.users tbody tr td:last-child{border-top-right-radius:18px;border-bottom-right-radius:18px;}
-
   .user-name{font-weight:700;color:var(--usuarios-dark);font-size:1.02rem;margin-bottom:.35rem;}
   .user-id{font-size:.82rem;color:var(--usuarios-muted);font-weight:600;}
   .chips{display:flex;flex-wrap:wrap;gap:.35rem;}
-  .chip{background:rgba(99,102,241,.16);border-radius:999px;padding:.2rem .7rem;color:#3730a3;font-size:.78rem;font-weight:700;border:1px solid rgba(99,102,241,.24);} 
+  .chip{background:var(--usuarios-primary-soft);border-radius:999px;padding:.2rem .7rem;color:var(--usuarios-primary);font-size:.78rem;font-weight:700;border:1px solid var(--usuarios-border);animation:fadeIn .6s ease both;}
   .help{font-size:.82rem;color:var(--usuarios-muted);margin-top:6px;}
-
-  .input,.select{width:100%;height:46px;border-radius:14px;border:1.5px solid var(--usuarios-border);background:#ffffff;color:var(--usuarios-dark);padding:0 1rem;font-weight:600;transition:border .15s,box-shadow .15s;} 
-  .input:focus,.select:focus{outline:none;border-color:var(--usuarios-primary);box-shadow:0 0 0 5px rgba(99,102,241,.18);} 
-
+  .input,.select{width:100%;height:46px;border-radius:14px;border:1.5px solid var(--usuarios-border);background:#ffffff;color:var(--usuarios-dark);padding:0 1rem;font-weight:600;transition:border .15s,box-shadow .15s;}
+  .input:focus,.select:focus{outline:none;border-color:var(--usuarios-primary);box-shadow:0 0 0 5px rgba(29,78,216,.16);}
   .actions{display:flex;gap:.5rem;justify-content:flex-end;flex-wrap:wrap;}
   .btn{display:inline-flex;gap:.45rem;align-items:center;border:0;border-radius:14px;padding:.65rem 1rem;font-weight:700;cursor:pointer;transition:transform .05s,filter .2s,box-shadow .2s;}
-  .btn:active{transform:translateY(1px) scale(.995);} 
-  .btn-primary{background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;box-shadow:0 18px 28px rgba(99,102,241,.25);} 
-  .btn-outline{background:#fff;border:1.5px solid var(--usuarios-border);color:var(--usuarios-dark);} 
-
+  .btn:active{transform:translateY(1px) scale(.995);}
+  .btn-primary{background:var(--usuarios-primary);color:#fff;box-shadow:0 18px 28px rgba(29,78,216,.22);}
+  .btn-outline{background:#fff;border:1.5px solid var(--usuarios-border);color:var(--usuarios-dark);transition:border .2s,color .2s,background .2s;}
+  .btn-outline:hover{background:var(--usuarios-primary-soft);color:var(--usuarios-primary);border-color:var(--usuarios-primary);}
   .alert{padding:1rem 1.2rem;border-radius:16px;margin:1.2rem 2rem 0;font-weight:600;border:1px solid transparent;}
   .alert-success{background:#ecfdf5;border-color:#bbf7d0;color:#047857;}
   .alert-error{background:#fff0f2;border-color:#fecdd3;color:#9f1239;}
-
   .users-card__footer{display:flex;justify-content:space-between;flex-wrap:wrap;gap:1rem;align-items:center;padding:1rem 2rem 1.4rem;color:var(--usuarios-muted);font-weight:600;}
-
-  tbody tr:hover td{background:rgba(99,102,241,.06);}
-
+  tbody tr:hover td{background:var(--usuarios-primary-soft);}
   @media (max-width:960px){
     table.users thead{display:none;}
     table.users{border-spacing:0 16px;padding:1.2rem;}
@@ -78,13 +70,11 @@
   }
 </style>
 @endpush
-
 @section('main')
 @php
   $collection = $users->getCollection();
   $resumenRoles = $collection->groupBy(fn($item) => optional($item->roles->first())->name ?? 'Sin rol')->map->count();
 @endphp
-
 <div class="users-page">
   <section class="intro">
     <div>
@@ -93,10 +83,9 @@
     </div>
     <div class="intro-badges">
       <span class="badge"><span class="material-symbols-outlined">group</span>Total: {{ $users->total() }}</span>
-      <span class="badge" style="background:rgba(34,211,238,.18);border-color:rgba(34,211,238,.35);"><span class="material-symbols-outlined">verified</span>Datos verificados</span>
+      <span class="badge" style="background:rgba(29,78,216,.12);border-color:rgba(29,78,216,.3);color:var(--usuarios-primary);"><span class="material-symbols-outlined">verified</span>Datos verificados</span>
     </div>
   </section>
-
   <section class="stats">
     @foreach($resumenRoles as $rolNombre => $cantidad)
       <article class="stat-card">
@@ -105,7 +94,6 @@
       </article>
     @endforeach
   </section>
-
   <div class="users-card">
     <div class="users-card__header">
       <div>

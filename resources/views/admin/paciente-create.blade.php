@@ -1,27 +1,23 @@
 @extends('layouts.admin')
 @section('title','Crear paciente | Admin')
-
 @push('head')
 <style>
   :root{
-    --paciente-primary:#6366f1;
-    --paciente-primary-soft:rgba(99,102,241,.12);
-    --paciente-border:#dbe3ff;
-    --paciente-dark:#111827;
-    --paciente-muted:#6b7280;
+    --paciente-primary:#1d4ed8;
+    --paciente-primary-soft:rgba(29,78,216,.08);
+    --paciente-border:#e2e8f0;
+    --paciente-dark:#0f172a;
+    --paciente-muted:#64748b;
     --paciente-card:#ffffff;
   }
-
   body{
-    background:radial-gradient(1400px 480px at 16% -16%,#eef2ff 0%,#ffffff 60%);
+    background:#f5f7fb;
   }
-
   .page{
     width:min(980px,100%);
     margin:2.6rem auto 2rem;
     padding:0 1.4rem 3rem;
   }
-
   .header{
     display:flex;
     flex-wrap:wrap;
@@ -29,22 +25,25 @@
     align-items:flex-start;
     gap:1.5rem;
     margin-bottom:1.5rem;
+    background:#ffffff;
+    border-radius:24px;
+    padding:26px 28px;
+    border:1px solid var(--paciente-border);
+    box-shadow:0 18px 38px rgba(15,23,42,.08);
+    animation:fadeSlideUp .55s ease both;
   }
-
   .header h2{
     margin:0;
     font-size:2rem;
     font-weight:800;
     color:var(--paciente-dark);
   }
-
   .header p{
     margin:.4rem 0 0;
     max-width:32ch;
     color:var(--paciente-muted);
     font-weight:500;
   }
-
   .badge{
     display:inline-flex;
     align-items:center;
@@ -55,52 +54,48 @@
     padding:.55rem 1rem;
     border-radius:999px;
     font-weight:700;
+    animation:fadeIn .6s ease both;
   }
-
   .card{
     background:var(--paciente-card);
     border-radius:22px;
-    border:1px solid #e5e9ff;
-    box-shadow:0 32px 44px rgba(17,24,39,.08);
+    border:1px solid var(--paciente-border);
+    box-shadow:0 26px 42px rgba(17,24,39,.08);
     overflow:hidden;
+    animation:fadeSlideUp .6s ease both;
   }
-
   .card-header{
     padding:1.6rem 2rem;
-    background:linear-gradient(180deg,#f8faff 0%,#ffffff 75%);
-    border-bottom:1px solid #e9edff;
+    background:#ffffff;
+    border-bottom:1px solid var(--paciente-border);
     display:flex;
     justify-content:space-between;
     align-items:center;
     gap:1.4rem;
     flex-wrap:wrap;
   }
-
   .card-header h3{
     margin:0;
     font-size:1.35rem;
     font-weight:800;
     color:var(--paciente-dark);
   }
-
   .card-header span{
     color:var(--paciente-muted);
     font-size:.95rem;
   }
-
   .card-body{
     padding:2rem;
     display:grid;
     gap:2rem;
   }
-
   .section{
-    border:1px dashed #e4e8ff;
+    border:1px dashed var(--paciente-border);
     border-radius:18px;
     padding:1.6rem;
-    background:#f9faff;
+    background:#f8faff;
+    animation:fadeSlideUp .65s ease both;
   }
-
   .section-title{
     font-size:1.05rem;
     font-weight:700;
@@ -110,81 +105,68 @@
     align-items:center;
     gap:.6rem;
   }
-
   .section-title .material-symbols-outlined{
     font-variation-settings:'FILL' 1,'wght' 600,'GRAD' 0,'opsz' 24;
     color:var(--paciente-primary);
   }
-
   .grid{
     display:grid;
     gap:1.1rem 1.2rem;
     grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
   }
-
   label{
     display:block;
     margin-bottom:.45rem;
     font-weight:700;
     color:var(--paciente-dark);
   }
-
   .input,.select{
     width:100%;
     height:48px;
     border-radius:14px;
-    border:1.6px solid #dbe2ff;
-    background:#f5f7ff;
+    border:1.6px solid var(--paciente-border);
+    background:#ffffff;
     padding:0 1rem;
     font-weight:600;
     color:var(--paciente-dark);
     transition:border .15s,box-shadow .15s,background .15s;
   }
-
   .input:focus,.select:focus{
     outline:none;
     border-color:var(--paciente-primary);
-    box-shadow:0 0 0 6px rgba(99,102,241,.18);
+    box-shadow:0 0 0 6px rgba(29,78,216,.16);
     background:#fff;
   }
-
   .field-help{
     margin-top:.4rem;
     font-size:.82rem;
     color:var(--paciente-muted);
   }
-
   .alerts{
     display:grid;
     gap:1rem;
     margin-bottom:1.2rem;
   }
-
   .alert{
     border-radius:16px;
     padding:1rem 1.2rem;
     font-weight:600;
   }
-
   .alert.success{
     background:#ecfdf5;
     border:1px solid #bbf7d0;
     color:#047857;
-  }
-
   .alert.error{
     background:#fff1f2;
     border:1px solid #fecdd3;
     color:#9f1239;
   }
-
   .card-footer{
     display:flex;
     justify-content:flex-end;
     gap:.75rem;
     padding:0 2rem 2rem;
   }
-
   .btn{
     border:none;
     border-radius:14px;
@@ -193,27 +175,23 @@
     cursor:pointer;
     transition:transform .05s,filter .2s,box-shadow .2s;
   }
-
   .btn:active{transform:translateY(1px) scale(.995);}
-
   .btn-secondary{
-    background:#eef2ff;
+    background:#f8faff;
     border:1px solid var(--paciente-border);
     color:var(--paciente-dark);
   }
-
   .btn-primary{
-    background:linear-gradient(135deg,#6366f1,#8b5cf6);
+    background:var(--paciente-primary);
     color:#fff;
-    box-shadow:0 20px 32px rgba(99,102,241,.28);
+    box-shadow:0 20px 32px rgba(29,78,216,.22);
   }
-
+  .btn-primary:hover{filter:brightness(.95);}
   @media (max-width:720px){
     .card-header{flex-direction:column;align-items:flex-start;}
   }
 </style>
 @endpush
-
 @section('main')
   <div class="page">
     <div class="header">
@@ -223,7 +201,6 @@
       </div>
       <span class="badge"><span class="material-symbols-outlined">verified_user</span>Registro seguro</span>
     </div>
-
     <div class="alerts">
       @if(session('success'))
         <div class="alert success">{{ session('success') }}</div>
@@ -234,7 +211,6 @@
         </div>
       @endif
     </div>
-
     <form class="card" method="POST" action="{{ route('admin.pacientes.store') }}" novalidate>
       @csrf
       <div class="card-header">
@@ -242,9 +218,8 @@
           <h3>Datos del paciente</h3>
           <span>Ingresa la información tal como aparece en la documentación oficial.</span>
         </div>
-        <span class="badge" style="background:#f1f5ff">Paso único</span>
+        <span class="badge" style="background:rgba(29,78,216,.12);border:1px solid var(--paciente-border);color:var(--paciente-primary);">Paso único</span>
       </div>
-
       <div class="card-body">
         <section class="section">
           <h4 class="section-title"><span class="material-symbols-outlined">badge</span>Identificación</h4>

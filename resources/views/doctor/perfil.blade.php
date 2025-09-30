@@ -8,9 +8,18 @@
 @push('styles')
     <style>
         body.profile-body {
-            background: radial-gradient(1600px 520px at 65% -20%, #e0f2fe 0%, #ffffff 60%);
+            background: var(--clr-color-background);
             font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Ubuntu, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
-            color: #0f172a;
+            color: var(--clr-dark);
+            --surface: var(--clr-white);
+            --surface-muted: var(--clr-surface-muted);
+            --border: var(--clr-border);
+            --accent: var(--clr-primary);
+            --accent-strong: var(--clr-primary-variant);
+            --accent-soft: rgba(15, 76, 117, 0.12);
+            --shadow: var(--box-shadow);
+            --shadow-lg: 0 28px 48px rgba(15, 76, 117, 0.14);
+            --text-muted: var(--clr-dark-variant);
         }
         .profile-wrapper {
             max-width: 1100px;
@@ -27,272 +36,116 @@
             gap: 1.5rem;
             padding: 28px 32px;
             border-radius: 28px;
-            background: linear-gradient(120deg, rgba(14,165,233,.16), rgba(59,130,246,.18));
-            border: 1px solid rgba(14,165,233,.28);
-            box-shadow: 0 28px 44px rgba(15,23,42,.08);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-lg);
+            animation: fade-in 0.7s ease both, slide-up 0.7s ease both;
         }
-        .profile-hero h1 {
-            margin: 0;
-            font-size: 2.15rem;
-            font-weight: 800;
+        .profile-hero h1 { margin: 0; font-size: 2.15rem; font-weight: 800; }
+        .profile-hero p { margin: .5rem 0 0; max-width: 42ch; color: var(--text-muted); font-weight: 500; }
+        .profile-hero .badge{
+            display:inline-flex; align-items:center; gap:.5rem;
+            padding:.65rem 1.1rem; border-radius:999px;
+            background:var(--accent-soft); border:1px solid rgba(15,76,117,.25);
+            font-weight:700; color:var(--clr-dark);
+            animation: fade-in .75s ease both;
         }
-        .profile-hero p {
-            margin: .5rem 0 0;
-            max-width: 42ch;
-            color: #1e3a8a;
-            font-weight: 500;
-        }
-        .profile-hero .badge {
-            display: inline-flex;
-            align-items: center;
-            gap: .5rem;
-            padding: .65rem 1.1rem;
-            border-radius: 999px;
-            background: rgba(14,165,233,.18);
-            border: 1px solid rgba(14,165,233,.3);
-            font-weight: 700;
-            color: #0f172a;
-        }
-        .profile-hero .badge .material-symbols-outlined {
-            font-variation-settings: 'FILL' 1,'wght' 600,'GRAD' 0,'opsz' 24;
-            color: #0ea5e9;
-        }
+        .profile-hero .badge .material-symbols-outlined{font-variation-settings:'FILL' 1,'wght' 600,'GRAD' 0,'opsz' 24;color:var(--accent);}
 
-        .profile-layout {
-            display: grid;
-            grid-template-columns: 320px 1fr;
-            gap: 26px;
-        }
+        .profile-layout { display:grid; grid-template-columns:320px 1fr; gap:26px; }
+
         .profile-aside {
-            background: #fff;
+            background: var(--surface);
             border-radius: 24px;
-            border: 1px solid #cfe5fb;
-            box-shadow: 0 24px 40px rgba(15,23,42,.08);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
             padding: 28px;
             display: grid;
             gap: 20px;
             align-content: start;
+            animation: fade-in .75s ease both, slide-up .75s ease both;
         }
-        .profile-avatar {
-            position: relative;
-            width: 140px;
-            height: 140px;
-            border-radius: 999px;
-            margin: 0 auto;
-            overflow: hidden;
-            border: 4px solid #dbeafe;
-            box-shadow: 0 14px 22px rgba(14, 116, 190, .16);
-        }
-        .profile-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-        }
-        .profile-avatar__overlay {
-            position: absolute;
-            inset: auto 0 0;
-            height: 48px;
-            background: linear-gradient(180deg, transparent, rgba(15,23,42,.75));
-            color: #fff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: .9rem;
-            cursor: pointer;
-            opacity: 0;
-            transition: opacity .2s;
-        }
-        .profile-avatar:hover .profile-avatar__overlay {
-            opacity: 1;
-        }
-        .profile-aside h2 {
-            margin: 0;
-            text-align: center;
-            font-size: 1.35rem;
-            font-weight: 800;
-        }
-        .profile-aside span {
-            text-align: center;
-            color: #475569;
-            font-weight: 600;
-        }
-        .profile-aside .chips {
-            display: flex;
-            flex-wrap: wrap;
-            gap: .35rem;
-            justify-content: center;
-        }
-        .chip {
-            background: rgba(14,165,233,.16);
-            border-radius: 999px;
-            padding: .2rem .7rem;
-            color: #0f172a;
-            font-weight: 700;
-            font-size: .78rem;
-            border: 1px solid rgba(14,165,233,.28);
-        }
-        .profile-aside .summary {
-            display: grid;
-            gap: .45rem;
-        }
-        .summary-item {
-            display: flex;
-            align-items: center;
-            gap: .55rem;
-            padding: .55rem .75rem;
-            border-radius: 14px;
-            background: rgba(14,165,233,.12);
-            color: #0f172a;
-            font-weight: 600;
-            font-size: .9rem;
-        }
-        .summary-item .material-symbols-outlined {
-            color: #0284c7;
-            font-variation-settings: 'FILL' 1,'wght' 500,'GRAD' 0,'opsz' 24;
-        }
+        .profile-avatar{ position:relative; width:140px; height:140px; border-radius:999px; margin:0 auto; overflow:hidden; border:4px solid rgba(15,76,117,.18); box-shadow:0 14px 28px rgba(15,76,117,.16);}
+        .profile-avatar img{ width:100%; height:100%; object-fit:cover; display:block; }
+        .profile-avatar__overlay{ position:absolute; inset:auto 0 0; height:48px; background:linear-gradient(180deg,transparent,rgba(15,76,117,.82)); color:#fff; display:flex; align-items:center; justify-content:center; font-size:.9rem; cursor:pointer; opacity:0; transition:opacity .2s;}
+        .profile-avatar:hover .profile-avatar__overlay{ opacity:1; }
 
-        .profile-card {
-            background: #fff;
+        .profile-aside h2{ margin:0; text-align:center; font-size:1.35rem; font-weight:800; }
+        .profile-aside span{ text-align:center; color:var(--text-muted); font-weight:600; }
+        .profile-aside .chips{ display:flex; flex-wrap:wrap; gap:.35rem; justify-content:center; }
+        .chip{ background:var(--accent-soft); border-radius:999px; padding:.2rem .7rem; color:var(--accent-strong); font-weight:700; font-size:.78rem; border:1px solid rgba(15,76,117,.24); }
+        .profile-aside .summary{ display:grid; gap:.45rem; }
+        .summary-item{ display:flex; align-items:center; gap:.55rem; padding:.55rem .75rem; border-radius:14px; background:var(--accent-soft); color:var(--accent-strong); font-weight:600; font-size:.9rem; border:1px solid rgba(15,76,117,.24); }
+        .summary-item .material-symbols-outlined{ color:var(--accent); font-variation-settings:'FILL' 1,'wght' 500,'GRAD' 0,'opsz' 24; }
+
+        .profile-card{
+            background: var(--surface);
             border-radius: 24px;
-            border: 1px solid #cfe5fb;
-            box-shadow: 0 28px 44px rgba(15,23,42,.08);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-lg);
             overflow: hidden;
+            animation: fade-in .8s ease both, slide-up .8s ease both;
         }
-        .profile-card__header {
-            padding: 1.6rem 2.2rem;
-            background: linear-gradient(180deg, #f0f9ff 0%, #ffffff 80%);
-            border-bottom: 1px solid #cfe5fb;
+        .profile-card__header{ padding:1.6rem 2.2rem; background:var(--surface-muted); border-bottom:1px solid var(--border); }
+        .profile-card__header h3{ margin:0; font-size:1.4rem; font-weight:800; }
+        .profile-card__header span{ color:var(--text-muted); font-size:.95rem; }
+
+        .profile-card__body{ padding:2.2rem; display:grid; gap:2rem; }
+
+        .section{
+            border:1px dashed rgba(15,76,117,.30);
+            border-radius:20px;
+            padding:1.6rem;
+            background:var(--surface);
         }
-        .profile-card__header h3 {
-            margin: 0;
-            font-size: 1.4rem;
-            font-weight: 800;
+        .section-title{
+            margin:0 0 1.05rem; font-size:1.05rem; font-weight:700;
+            display:flex; align-items:center; gap:.6rem; color:var(--accent-strong);
         }
-        .profile-card__header span {
-            color: #64748b;
-            font-size: .95rem;
-        }
-        .profile-card__body {
-            padding: 2.2rem;
-            display: grid;
-            gap: 2rem;
-        }
-        .section {
-            border: 1px dashed #bae6fd;
-            border-radius: 20px;
-            padding: 1.6rem;
-            background: #f7fbff;
-        }
-        .section-title {
-            margin: 0 0 1.05rem;
-            font-size: 1.05rem;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: .6rem;
-            color: #0f172a;
-        }
-        .section-title .material-symbols-outlined {
-            color: #0ea5e9;
-            font-variation-settings: 'FILL' 1,'wght' 600,'GRAD' 0,'opsz' 24;
-        }
-        .profile-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px,1fr));
-            gap: 1.2rem 1.4rem;
-        }
-        label {
-            display: block;
-            font-weight: 700;
-            margin-bottom: .45rem;
-            color: #0f172a;
-        }
-        input,
-        select {
-            width: 100%;
-            height: 50px;
-            border-radius: 14px;
-            border: 1.5px solid #bae6fd;
-            background: #fff;
-            padding: 0 1.1rem;
-            font-weight: 600;
-            color: #0f172a;
-            transition: border .15s, box-shadow .15s;
-        }
-        input:focus,
-        select:focus {
-            outline: none;
-            border-color: #0ea5e9;
-            box-shadow: 0 0 0 6px rgba(14,165,233,.18);
-        }
-        .help {
-            font-size: .82rem;
-            color: #64748b;
-            margin-top: .35rem;
-        }
-        .error {
-            font-size: .85rem;
-            color: #ef4444;
-            margin-top: .35rem;
-            font-weight: 600;
+        .section-title .material-symbols-outlined{ color:var(--accent); font-variation-settings:'FILL' 1,'wght' 600,'GRAD' 0,'opsz' 24; }
+
+        .profile-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:1.2rem 1.4rem; }
+
+        /* ====== NUEVO: recuadros para cada campo ====== */
+        .field-box{
+            border:1px dashed rgba(15,76,117,.28);
+            border-radius:16px;
+            padding:14px;
+            background:var(--surface);
         }
 
-        .alerts {
-            display: grid;
-            gap: 1rem;
-            margin: 0 2.2rem;
+        label{ display:block; font-weight:700; margin-bottom:.45rem; color:var(--clr-dark); }
+        input, select{
+            width:100%; height:50px; border-radius:14px; border:1.5px solid var(--border);
+            background:var(--surface); padding:0 1.1rem; font-weight:600; color:var(--clr-dark);
+            transition:border .15s, box-shadow .15s;
         }
-        .alert {
-            padding: 1rem 1.2rem;
-            border-radius: 18px;
-            font-weight: 600;
-            border: 1px solid transparent;
-        }
-        .alert.success {
-            background: #ecfdf5;
-            border-color: #bbf7d0;
-            color: #047857;
-        }
-        .alert.danger {
-            background: #fff0f2;
-            border-color: #fecdd3;
-            color: #9f1239;
-        }
-        .profile-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: .75rem;
-            padding: 0 2.2rem 2.2rem;
-            flex-wrap: wrap;
-        }
-        .btn {
-            border: none;
-            border-radius: 14px;
-            padding: .85rem 1.4rem;
-            font-weight: 800;
-            cursor: pointer;
-            font-size: .95rem;
-            transition: transform .05s, filter .2s, box-shadow .2s;
-        }
-        .btn:active {
-            transform: translateY(1px) scale(.995);
-        }
-        .btn-primary {
-            color: #fff;
-            background: linear-gradient(135deg, #0ea5e9, #2563eb);
-            box-shadow: 0 18px 28px rgba(14,165,233,.25);
-        }
-        .btn-secondary {
-            background: #f0f9ff;
-            color: #0f172a;
-            border: 1px solid #bae6fd;
-        }
-        .hidden { display: none; }
+        input:focus, select:focus{ outline:none; border-color:var(--accent); box-shadow:0 0 0 4px rgba(15,76,117,.15); }
 
-        @media (max-width: 980px) {
-            .profile-layout { grid-template-columns: 1fr; }
-            .profile-aside { order: 2; }
+        .help{ font-size:.82rem; color:var(--text-muted); margin-top:.35rem; }
+        .error{ font-size:.85rem; color:var(--clr-danger); margin-top:.35rem; font-weight:600; }
+
+        .alerts{ display:grid; gap:1rem; margin:0 2.2rem; }
+        .alert{ padding:1rem 1.2rem; border-radius:18px; font-weight:600; border:1px solid transparent; }
+        .alert.success{ background:rgba(26,127,92,.12); border-color:rgba(26,127,92,.32); color:var(--clr-success); }
+        .alert.danger{ background:rgba(178,58,72,.12); border-color:rgba(178,58,72,.32); color:var(--clr-danger); }
+
+        .profile-actions{ display:flex; justify-content:flex-end; gap:.75rem; padding:0 2.2rem 2.2rem; flex-wrap:wrap; }
+        .btn{
+            border-radius:14px; padding:.85rem 1.4rem; font-weight:800; cursor:pointer; font-size:.95rem;
+            transition:transform .05s, filter .2s, box-shadow .2s, background .2s, color .2s;
+            border:1px solid var(--border); background:var(--surface); color:var(--clr-dark);
+            display:inline-flex; align-items:center; justify-content:center; gap:.4rem;
+        }
+        .btn:active{ transform:translateY(1px) scale(.995); }
+        .btn-primary{ color:#fff; background:var(--accent); border-color:var(--accent); box-shadow:0 18px 28px rgba(15,76,117,.22); }
+        .btn-primary:hover{ filter:brightness(.95); }
+        .btn-secondary{ background:var(--surface-muted); color:var(--accent-strong); border:1px solid var(--border); }
+
+        .hidden{ display:none; }
+        @media (max-width:980px){
+            .profile-layout{ grid-template-columns:1fr; }
+            .profile-aside{ order:2; }
         }
     </style>
 @endpush
@@ -334,6 +187,9 @@
                     @if($user->direccion)
                         <div class="summary-item"><span class="material-symbols-outlined">location_on</span>{{ $user->direccion }}</div>
                     @endif
+                    @if(!is_null($user->precio_consulta))
+                        <div class="summary-item"><span class="material-symbols-outlined">payments</span>Precio: ${{ number_format($user->precio_consulta,2) }} USD</div>
+                    @endif
                 </div>
             </aside>
 
@@ -366,17 +222,17 @@
                         <section class="section">
                             <h4 class="section-title"><span class="material-symbols-outlined">badge</span>Identidad</h4>
                             <div class="profile-grid">
-                                <div>
+                                <div class="field-box">
                                     <label>Nombre</label>
                                     <input type="text" name="name" value="{{ old('name', $user->name) }}" required>
                                     @error('name')<div class="error">{{ $message }}</div>@enderror
                                 </div>
-                                <div>
+                                <div class="field-box">
                                     <label>Correo</label>
                                     <input type="email" name="email" value="{{ old('email', $user->email) }}" required>
                                     @error('email')<div class="error">{{ $message }}</div>@enderror
                                 </div>
-                                <div>
+                                <div class="field-box">
                                     <label>Teléfono</label>
                                     <input type="tel" name="telefono" value="{{ old('telefono', $user->telefono) }}"
                                            inputmode="numeric" pattern="\d{10}" minlength="10" maxlength="10"
@@ -384,7 +240,7 @@
                                     <div class="help">Formato: 10 dígitos.</div>
                                     @error('telefono')<div class="error">{{ $message }}</div>@enderror
                                 </div>
-                                <div>
+                                <div class="field-box">
                                     <label>Número de Cédula</label>
                                     <input type="text" name="dni" value="{{ old('dni', $user->dni) }}"
                                            inputmode="numeric" pattern="\d{10}" minlength="10" maxlength="10"
@@ -398,17 +254,17 @@
                         <section class="section">
                             <h4 class="section-title"><span class="material-symbols-outlined">home_pin</span>Información adicional</h4>
                             <div class="profile-grid">
-                                <div>
+                                <div class="field-box">
                                     <label>Dirección</label>
                                     <input type="text" name="direccion" value="{{ old('direccion', $user->direccion) }}">
                                     @error('direccion')<div class="error">{{ $message }}</div>@enderror
                                 </div>
-                                <div>
+                                <div class="field-box">
                                     <label>Fecha de nacimiento</label>
                                     <input type="date" name="fecha_nacimiento" value="{{ old('fecha_nacimiento', optional($user->fecha_nacimiento)->toDateString()) }}">
                                     @error('fecha_nacimiento')<div class="error">{{ $message }}</div>@enderror
                                 </div>
-                                <div>
+                                <div class="field-box">
                                     <label>Sexo</label>
                                     <select name="sexo">
                                         <option value="">Seleccionar</option>
@@ -418,6 +274,16 @@
                                     </select>
                                     @error('sexo')<div class="error">{{ $message }}</div>@enderror
                                 </div>
+                                {{-- NUEVO: Precio de consulta (USD) --}}
+                                <div class="field-box">
+                                    <label>Precio de consulta (USD)</label>
+                                    <input type="number" name="precio_consulta" step="0.01" min="0"
+                                           value="{{ old('precio_consulta', $user->precio_consulta) }}"
+                                           placeholder="Ej: 25.00">
+                                    <div class="help">Moneda fija: USD.</div>
+                                    @error('precio_consulta')<div class="error">{{ $message }}</div>@enderror
+                                </div>
+                                <input type="hidden" name="moneda" value="USD">
                             </div>
                         </section>
                     </div>
@@ -431,6 +297,7 @@
         </div>
     </div>
 @endsection
+
 @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', () => {

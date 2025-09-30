@@ -34,6 +34,44 @@ function estadoClass(s){
 
 function cap(s){ return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
 
+// ====== FORMATEO DE FECHA Y HORA (corto) ======
+const TZ = 'America/Guayaquil';
+
+const fmtDate = (val) => {
+  // Acepta ISO o 'YYYY-MM-DD' y devuelve 'dd/mm/yyyy'
+  if (!val) return '';
+  try {
+    // Si ya viene corto, no tocar
+    if (/^\d{2}\/\d{2}\/\d{4}$/.test(val)) return val;
+    // Si viene 'YYYY-MM-DD', conviértelo primero a Date seguro
+    if (/^\d{4}-\d{2}-\d{2}$/.test(val)) {
+      const [y,m,d] = val.split('-').map(Number);
+      const date = new Date(Date.UTC(y, m-1, d));
+      return new Intl.DateTimeFormat('es-EC', {
+        day:'2-digit', month:'2-digit', year:'numeric', timeZone: TZ
+      }).format(date);
+    }
+    const d = new Date(val);
+    return new Intl.DateTimeFormat('es-EC', {
+      day:'2-digit', month:'2-digit', year:'numeric', timeZone: TZ
+    }).format(d);
+  } catch { return val; }
+};
+
+const fmtTime = (val) => {
+  // Devuelve HH:mm
+  if (!val) return '';
+  // Si ya viene 'HH:mm' o 'HH:mm:ss', recortar
+  if (/^\d{2}:\d{2}(:\d{2})?$/.test(val)) return val.slice(0,5);
+  try {
+    const d = new Date(val);
+    return new Intl.DateTimeFormat('es-EC', {
+      hour:'2-digit', minute:'2-digit', hour12:false, timeZone: TZ
+    }).format(d);
+  } catch { return val; }
+};
+// ===============================================
+
 // Dibuja el aro de progreso (SVG circle)
 function setCircle(idx, percent){
   const c = els.circles?.[idx];
@@ -76,14 +114,19 @@ async function refreshDashboard(){
       if (rows.length === 0){
         els.tbody.innerHTML = `<tr><td colspan="4">Sin citas para hoy.</td></tr>`;
       } else {
-        els.tbody.innerHTML = rows.map(c => `
-          <tr>
-            <td>${c.paciente ?? 'Paciente'}</td>
-            <td class="${estadoClass(c.estado)}">${cap(c.estado || '')}</td>
-            <td>${c.fecha ?? ''}</td>
-            <td>${c.hora ?? ''}</td>
-          </tr>
-        `).join('');
+        els.tbody.innerHTML = rows.map(c => {
+          // Preferir campos ya formateados si existen; si no, helpers
+          const fechaCorta = c.fecha_corta ?? fmtDate(c.fecha);
+          const horaCorta  = c.hora ?? fmtTime(c.fecha);
+          return `
+            <tr>
+              <td>${c.paciente ?? 'Paciente'}</td>
+              <td class="${estadoClass(c.estado)}">${cap(c.estado || '')}</td>
+              <td>${fechaCorta}</td>
+              <td>${horaCorta}</td>
+            </tr>
+          `;
+        }).join('');
       }
     }
   }catch(e){
