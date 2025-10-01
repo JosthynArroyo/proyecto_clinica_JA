@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
-use Illuminate\Support\Facades.Hash;
+use Illuminate\Support\Facades\Hash;
 use App\Models\Cita;
 use App\Models\User;
 use App\Models\Role;
@@ -19,7 +19,7 @@ class AdminController extends Controller
     {
         $user = Auth::user();
 
-        $citas = Cita::with(['paciente','doctor'])
+        $citas = Cita::with(['paciente', 'doctor'])
             ->orderBy('created_at', 'desc')
             ->limit(50)
             ->get();
@@ -66,7 +66,7 @@ class AdminController extends Controller
             'name'              => ['required', 'string', 'max:255'],
             'email'             => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
             'telefono'          => ['nullable', 'digits:10'],
-            'dni'               => ['required', 'digits:10', Rule::unique('users','dni')->ignore($user->id)],
+            'dni'               => ['required', 'digits:10', Rule::unique('users', 'dni')->ignore($user->id)],
             'direccion'         => ['nullable', 'string', 'max:255'],
             'fecha_nacimiento'  => ['nullable', 'date', 'before:today'],
             'sexo'              => ['nullable', 'in:Masculino,Femenino,Otro'],
@@ -105,7 +105,7 @@ class AdminController extends Controller
 
     public function usuarios(Request $request)
     {
-        $users = User::with(['roles','especialidades'])
+        $users = User::with(['roles', 'especialidades'])
             ->orderBy('created_at', 'desc')
             ->paginate(12);
 
@@ -127,15 +127,15 @@ class AdminController extends Controller
     public function usuarioUpdate(Request $request, User $user)
     {
         $request->validate([
-            'name'    => ['required','string','max:255'],
-            'email'   => ['required','email','max:255', Rule::unique('users','email')->ignore($user->id)],
-            'role_id' => ['required','exists:roles,id'],
-            'active'  => ['nullable','in:0,1'],
+            'name'    => ['required', 'string', 'max:255'],
+            'email'   => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
+            'role_id' => ['required', 'exists:roles,id'],
+            'active'  => ['nullable', 'in:0,1'],
         ]);
 
         $currentRoleId   = optional($user->roles()->first())->id;
         $requestedRoleId = (int) $request->role_id;
-        $isAdminTarget   = $user->roles()->where('name','administrador')->exists();
+        $isAdminTarget   = $user->roles()->where('name', 'administrador')->exists();
 
         if ($isAdminTarget && $requestedRoleId !== (int) $currentRoleId) {
             return back()->withErrors(['No puedes cambiar el rol de una cuenta con rol Administrador.']);
@@ -150,7 +150,7 @@ class AdminController extends Controller
         } else {
             $seEstaQuitandoAdmin = $isAdminTarget && $requestedRoleId !== (int) $currentRoleId;
             if ($seEstaQuitandoAdmin) {
-                $totalAdmins = User::whereHas('roles', fn($q)=>$q->where('name','administrador'))->count();
+                $totalAdmins = User::whereHas('roles', fn($q) => $q->where('name', 'administrador'))->count();
                 if ($totalAdmins <= 1) {
                     return back()->withErrors(['No puedes quitar el rol del único Administrador del sistema.']);
                 }
@@ -207,43 +207,43 @@ class AdminController extends Controller
     public function guardarDoctor(Request $request)
     {
         $rules = [
-            'name'             => ['required','string','max:255'],
-            'email'            => ['required','email','max:255','unique:users,email'],
-            'password'         => ['required','string','min:8','confirmed','regex:/^(?=.*[A-Za-z])(?=.*\d).+$/'],
-            'telefono'         => ['nullable','digits:10'],
-            'dni'              => ['required','digits:10','unique:users,dni'],
-            'direccion'        => ['nullable','string','max:255'],
-            'fecha_nacimiento' => ['required','date','before:today'],
-            'sexo'             => ['nullable','in:Masculino,Femenino,Otro'],
-            'avatar'           => ['nullable','image','mimes:jpg,jpeg,png,webp','max:2048'],
+            'name'             => ['required', 'string', 'max:255'],
+            'email'            => ['required', 'email', 'max:255', 'unique:users,email'],
+            'password'         => ['required', 'string', 'min:8', 'confirmed', 'regex:/^(?=.*[A-Za-z])(?=.*\d).+$/'],
+            'telefono'         => ['nullable', 'digits:10'],
+            'dni'              => ['required', 'digits:10', 'unique:users,dni'],
+            'direccion'        => ['nullable', 'string', 'max:255'],
+            'fecha_nacimiento' => ['required', 'date', 'before:today'],
+            'sexo'             => ['nullable', 'in:Masculino,Femenino,Otro'],
+            'avatar'           => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
 
             // SOLO UNA ESPECIALIDAD (obligatoria)
-            'especialidad_id'  => ['required','integer','exists:especialidades,id'],
+            'especialidad_id'  => ['required', 'integer', 'exists:especialidades,id'],
 
-            // NUEVO:
-            'precio_consulta'  => ['nullable','numeric','min:0','max:99999999.99'],
-            'moneda'           => ['nullable','in:USD'], // Ecuador -> USD fijo
+            // NUEVO: precio y moneda
+            'precio_consulta'  => ['nullable', 'numeric', 'min:0', 'max:99999999.99'],
+            'moneda'           => ['nullable', 'in:USD'], // Ecuador -> USD fijo
         ];
 
         $messages = [
-            'required'              => 'El :attribute es obligatorio.',
-            'email'                 => 'Ingresa un correo válido.',
-            'unique'                => 'Este :attribute ya está registrado.',
-            'password.min'          => 'La contraseña debe tener al menos 8 caracteres.',
-            'confirmed'             => 'La confirmación de :attribute no coincide.',
-            'password.regex'        => 'La contraseña debe incluir letras y números.',
-            'digits'                => 'El :attribute debe tener exactamente :digits dígitos.',
-            'in'                    => 'Selecciona un valor válido para :attribute.',
-            'date'                  => 'La :attribute no es válida.',
-            'before'                => 'La :attribute debe ser anterior a hoy.',
-            'image'                 => 'La :attribute debe ser una imagen.',
-            'mimes'                 => 'La :attribute debe ser jpg, jpeg, png o webp.',
-            'max'                   => 'La :attribute no debe superar :max.',
-            'integer'               => 'Selecciona una especialidad válida.',
-            'exists'                => 'La especialidad seleccionada no existe.',
-            'dni.required'          => 'El número de cédula es obligatorio.',
-            'dni.digits'            => 'El número de cédula debe tener exactamente 10 dígitos.',
-            'dni.unique'            => 'Este número de cédula ya está registrado.',
+            'required'                => 'El :attribute es obligatorio.',
+            'email'                   => 'Ingresa un correo válido.',
+            'unique'                  => 'Este :attribute ya está registrado.',
+            'password.min'            => 'La contraseña debe tener al menos 8 caracteres.',
+            'confirmed'               => 'La confirmación de :attribute no coincide.',
+            'password.regex'          => 'La contraseña debe incluir letras y números.',
+            'digits'                  => 'El :attribute debe tener exactamente :digits dígitos.',
+            'in'                      => 'Selecciona un valor válido para :attribute.',
+            'date'                    => 'La :attribute no es válida.',
+            'before'                  => 'La :attribute debe ser anterior a hoy.',
+            'image'                   => 'La :attribute debe ser una imagen.',
+            'mimes'                   => 'La :attribute debe ser jpg, jpeg, png o webp.',
+            'max'                     => 'La :attribute no debe superar :max.',
+            'integer'                 => 'Selecciona una especialidad válida.',
+            'exists'                  => 'La especialidad seleccionada no existe.',
+            'dni.required'            => 'El número de cédula es obligatorio.',
+            'dni.digits'              => 'El número de cédula debe tener exactamente 10 dígitos.',
+            'dni.unique'              => 'Este número de cédula ya está registrado.',
             // Nuevos
             'precio_consulta.numeric' => 'El precio debe ser numérico.',
             'precio_consulta.min'     => 'El precio no puede ser negativo.',
@@ -270,19 +270,19 @@ class AdminController extends Controller
         $validated = $request->validate($rules, $messages, $attributes);
 
         $user = new User();
-        $user->name  = $validated['name'];
-        $user->email = $validated['email'];
-        $user->password = Hash::make($validated['password']);
-        $user->active = true;
-        $user->telefono = $validated['telefono'] ?? null;
-        $user->dni = $validated['dni'] ?? null;
-        $user->direccion = $validated['direccion'] ?? null;
+        $user->name             = $validated['name'];
+        $user->email            = $validated['email'];
+        $user->password         = Hash::make($validated['password']);
+        $user->active           = true;
+        $user->telefono         = $validated['telefono'] ?? null;
+        $user->dni              = $validated['dni'] ?? null;
+        $user->direccion        = $validated['direccion'] ?? null;
         $user->fecha_nacimiento = $validated['fecha_nacimiento'] ?? null;
-        $user->sexo = $validated['sexo'] ?? null;
+        $user->sexo             = $validated['sexo'] ?? null;
 
-        // NUEVO:
-        $user->precio_consulta = $validated['precio_consulta'] ?? null;
-        $user->moneda = 'USD';
+        // NUEVO: precio y moneda (moneda fija USD)
+        $user->precio_consulta  = $validated['precio_consulta'] ?? null;
+        $user->moneda           = 'USD';
 
         if ($request->hasFile('avatar')) {
             $user->avatar = $request->file('avatar')->store('avatars', 'public');
@@ -302,10 +302,10 @@ class AdminController extends Controller
     public function doctoresPorEspecialidad(Especialidad $especialidad)
     {
         $doctores = $especialidad->doctores()
-            ->whereHas('roles', fn($q) => $q->where('name','doctor'))
+            ->whereHas('roles', fn($q) => $q->where('name', 'doctor'))
             ->where('active', true)
             ->orderBy('name')
-            ->get(['users.id','users.name']);
+            ->get(['users.id', 'users.name']);
 
         return response()->json($doctores);
     }
@@ -318,14 +318,14 @@ class AdminController extends Controller
     public function storePaciente(Request $request)
     {
         $rules = [
-            'name'             => ['required','string','max:255'],
-            'email'            => ['required','email','max:255','unique:users,email'],
-            'password'         => ['required','string','min:8','confirmed','regex:/^(?=.*[A-Za-z])(?=.*\d).+$/'],
-            'telefono'         => ['nullable','digits:10'],
-            'dni'              => ['required','digits:10','unique:users,dni'],
-            'direccion'        => ['nullable','string','max:255'],
-            'fecha_nacimiento' => ['nullable','date','before:today'],
-            'sexo'             => ['nullable','in:Masculino,Femenino,Otro'],
+            'name'             => ['required', 'string', 'max:255'],
+            'email'            => ['required', 'email', 'max:255', 'unique:users,email'],
+            'password'         => ['required', 'string', 'min:8', 'confirmed', 'regex:/^(?=.*[A-Za-z])(?=.*\d).+$/'],
+            'telefono'         => ['nullable', 'digits:10'],
+            'dni'              => ['required', 'digits:10', 'unique:users,dni'],
+            'direccion'        => ['nullable', 'string', 'max:255'],
+            'fecha_nacimiento' => ['nullable', 'date', 'before:today'],
+            'sexo'             => ['nullable', 'in:Masculino,Femenino,Otro'],
         ];
 
         $messages = [
@@ -355,15 +355,15 @@ class AdminController extends Controller
         $data = $request->validate($rules, $messages, $attributes);
 
         $user = new User();
-        $user->name  = $data['name'];
-        $user->email = $data['email'];
-        $user->password = Hash::make($data['password']);
-        $user->active  = true;
-        $user->telefono = $data['telefono'] ?? null;
-        $user->dni = $data['dni'];
-        $user->direccion = $data['direccion'] ?? null;
+        $user->name             = $data['name'];
+        $user->email            = $data['email'];
+        $user->password         = Hash::make($data['password']);
+        $user->active           = true;
+        $user->telefono         = $data['telefono'] ?? null;
+        $user->dni              = $data['dni'];
+        $user->direccion        = $data['direccion'] ?? null;
         $user->fecha_nacimiento = $data['fecha_nacimiento'] ?? null;
-        $user->sexo = $data['sexo'] ?? null;
+        $user->sexo             = $data['sexo'] ?? null;
         $user->save();
 
         $role = Role::where('name', 'paciente')->firstOrFail();
@@ -374,7 +374,9 @@ class AdminController extends Controller
 
     private function roleNameById(?int $roleId): ?string
     {
-        if (!$roleId) return null;
+        if (!$roleId) {
+            return null;
+        }
         return optional(Role::find($roleId))->name;
     }
 }

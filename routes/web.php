@@ -10,6 +10,11 @@ use App\Http\Controllers\ExportCitasController;
 use App\Http\Controllers\Paciente\AdminController as PacienteDashboardController;
 use App\Http\Controllers\Doctor\AdminController as DoctorDashboardController;
 use App\Http\Controllers\ContactoController;
+use App\Http\Controllers\Api\TarifaController;
+
+Route::get('/api/tarifa/doctor/{id}', [TarifaController::class, 'precioDoctor'])
+    ->whereNumber('id')
+    ->name('api.tarifa.doctor.show');
 
 Route::get('/', fn() => view('welcome'));
 

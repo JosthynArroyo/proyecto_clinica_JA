@@ -26,7 +26,9 @@
                 <form method="POST" action="{{ route('paciente.crear-cita.store') }}"
                       data-endpoint-template="{{ route('especialidades.doctores', ['especialidad' => 'ESP_ID']) }}"
                       data-old-esp="{{ old('especialidad_id') }}"
-                      data-old-doc="{{ old('doctor_id') }}">
+                      data-old-doc="{{ old('doctor_id') }}"
+                      {{-- NUEVO: plantilla de URL para la tarifa del doctor --}}
+                      data-tarifa-template="{{ route('api.tarifa.doctor.show', ['id' => 'DOC_ID']) }}">
                     @csrf
                     <div class="form-grid">
                         <div class="col-span-2">
@@ -49,6 +51,7 @@
                             </div>
                             @error('especialidad_id')<span class="error">{{ $message }}</span>@enderror
                         </div>
+
                         <div class="col-span-2">
                             <label for="doctor_id">Doctor</label>
                             <div class="input">
@@ -66,7 +69,13 @@
                                 </span>
                             </div>
                             @error('doctor_id')<span class="error">{{ $message }}</span>@enderror
+
+                            {{-- NUEVO: panel para mostrar la tarifa del doctor seleccionado --}}
+                            <div id="tarifaPanel" class="tarifa-panel" aria-live="polite" hidden>
+                                <span id="tarifaLabel">Tarifa: —</span>
+                            </div>
                         </div>
+
                         <div>
                             <label for="fecha">Fecha</label>
                             <div class="input">
@@ -83,6 +92,7 @@
                             @error('fecha')<span class="error">{{ $message }}</span>@enderror
                             <div class="help">Solo se permiten fechas a partir de hoy.</div>
                         </div>
+
                         <div>
                             <label for="hora">Hora</label>
                             <div class="input">
@@ -106,4 +116,20 @@
             </div>
         </div>
     </div>
+
+    {{-- estilos mínimos para el panel de tarifa --}}
+    <style>
+        .tarifa-panel{
+            margin-top: .6rem;
+            border:1px dashed #cbd5e1;
+            background:#f8fafc;
+            padding:.6rem .8rem;
+            border-radius:12px;
+            font-weight:700;
+            color:#0f172a;
+        }
+        .tarifa-panel.is-warning{
+            border-color:#fecaca; background:#fff1f2; color:#b91c1c;
+        }
+    </style>
 @endsection
