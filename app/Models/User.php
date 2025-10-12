@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use App\Models\Especialidad;
 
 class User extends Authenticatable
 {
@@ -22,7 +21,7 @@ class User extends Authenticatable
         'fecha_nacimiento',
         'sexo',
         'avatar',
-        // NUEVO:
+        // Campos de tarifa del doctor
         'precio_consulta',
         'moneda',
     ];
@@ -36,10 +35,10 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password'          => 'hashed',
         'fecha_nacimiento'  => 'date',
-        // NUEVO:
         'precio_consulta'   => 'decimal:2',
     ];
 
+    /** Roles */
     public function roles()
     {
         return $this->belongsToMany(Role::class);
@@ -50,9 +49,22 @@ class User extends Authenticatable
         return $this->roles()->where('name', $roleName)->exists();
     }
 
+    /** Especialidades (para doctores) */
     public function especialidades()
     {
         return $this->belongsToMany(Especialidad::class, 'doctor_especialidad', 'user_id', 'especialidad_id')
             ->withTimestamps();
+    }
+
+    /** Facturación: facturas donde el usuario es paciente */
+    public function facturasComoPaciente()
+    {
+        return $this->hasMany(Factura::class, 'paciente_id');
+    }
+
+    /** Facturación: facturas donde el usuario es el doctor */
+    public function facturasComoDoctor()
+    {
+        return $this->hasMany(Factura::class, 'doctor_id');
     }
 }

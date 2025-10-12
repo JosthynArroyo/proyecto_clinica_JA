@@ -1,11 +1,13 @@
 @extends('layouts.paciente')
 @section('title', 'Panel Paciente - Clínica Los Ángeles')
 @push('head')
-    @vite('resources/js/dashboard-paciente.js')
+    @vite('resources/js/paciente/dashboard-paciente.js')
 @endpush
 @section('main')
     <h1>Mi Panel</h1>
-    <div class="date"><input type="date"></div>
+    <div class="date">
+        <input type="date" value="{{ \Carbon\Carbon::now()->format('Y-m-d') }}">
+    </div>
     @if(session('success'))
         <div class="alert success">{{ session('success') }}</div>
     @endif
@@ -37,7 +39,7 @@
             <small>Historial</small>
         </div>
         <div class="income">
-            <span class="material-symbols-sharp">cancel</span>
+            <span class="material-symbols-sharp">pending</span>
             <div class="middle">
                 <div class="left">
                     <h3>Pendientes</h3>
@@ -67,8 +69,8 @@
                 <tr>
                     <td>{{ $cita->doctor->name ?? 'Sin asignar' }}</td>
                     <td>{{ $cita->especialidad->nombre ?? '—' }}</td>
-                    <td>{{ $cita->fecha }}</td>
-                    <td>{{ $cita->hora }}</td>
+                    <td>{{ \Carbon\Carbon::parse($cita->fecha)->format('Y/m/d') }}</td>
+                    <td>{{ \Carbon\Carbon::parse($cita->hora)->format('H:i') }}</td>
                     <td>
                         <span class="badge {{ $cita->estado === 'pendiente' ? 'warning' : ($cita->estado === 'realizada' ? 'success' : ($cita->estado === 'confirmada' ? 'info' : 'danger')) }}">
                             {{ ucfirst($cita->estado) }}

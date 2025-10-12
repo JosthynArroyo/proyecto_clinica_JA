@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Clínica Los Ángeles</title>
     @vite(['resources/css/welcome.css','resources/js/welcome-login-modal.js'])
 </head>
@@ -10,12 +10,10 @@
     <header class="header">
         <div class="menu container">
             <a href="{{ url('/') }}" class="logo">Clinica Los Angeles</a>
-
             <input type="checkbox" id="menu">
             <label for="menu" aria-label="Abrir menú">
                 <img src="{{ asset('img/menu.png') }}" class="menu-icono" alt="Menú">
             </label>
-
             <nav class="navbar" aria-label="Navegación principal">
                 <ul>
                     @if (Route::has('login'))
@@ -28,11 +26,7 @@
                             </li>
                         @endauth
                     @endif
-
-                    {{-- Registro deshabilitado porque lo hace el administrador --}}
-                    {{-- <li><a href="{{ route('register') }}">Registrarse</a></li> --}}
-
-                    <li><a href="{{ route('contacto.form') }}">Contacto</a></li>
+                    <li><a href="{{ route('contacto.guest') }}">Contacto</a></li>
                 </ul>
             </nav>
         </div>
@@ -42,7 +36,6 @@
                 <h1>Clinica</h1>
                 <span>Los Ángeles</span>
                 <p>Sistema de gestión médica para agendar citas fácilmente y recibir atención especializada.</p>
-
                 @auth
                     <a href="{{ route('paciente.dashboard') }}" class="btn-1">Agendar Cita</a>
                 @else
@@ -50,7 +43,6 @@
                     <noscript><a href="{{ route('login') }}" class="btn-1">Agendar Cita</a></noscript>
                 @endauth
             </div>
-
             <div class="header-dir">
                 <div class="dir">
                     <h3>Dirección</h3>
@@ -83,7 +75,6 @@
             <hr>
             <p>Contamos con atención médica en múltiples especialidades para cuidar de tu salud y bienestar.</p>
         </div>
-
         <div class="services-group">
             <div class="services-1">
                 <svg class="svc-icon" viewBox="0 0 24 24" aria-hidden="true">
@@ -95,7 +86,6 @@
                 <h3>Medicina General</h3>
                 <p>Evaluaciones integrales, diagnósticos iniciales y derivaciones oportunas para tu cuidado primario.</p>
             </div>
-
             <div class="services-1">
                 <svg class="svc-icon" viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M20.5 9.5c0 5.4-8.5 10-8.5 10S3.5 14.9 3.5 9.5A4.9 4.9 0 0 1 12 8a4.9 4.9 0 0 1 8.5 1.5Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
@@ -104,7 +94,6 @@
                 <h3>Cardiología</h3>
                 <p>Prevención, diagnóstico y tratamiento de enfermedades del corazón y sistema cardiovascular.</p>
             </div>
-
             <div class="services-1">
                 <svg class="svc-icon" viewBox="0 0 24 24" aria-hidden="true">
                     <circle cx="12" cy="8" r="3.2" fill="none" stroke="currentColor" stroke-width="1.8"/>
@@ -114,7 +103,6 @@
                 <h3>Pediatría</h3>
                 <p>Atención especializada para bebés, niños y adolescentes con enfoque integral y preventivo.</p>
             </div>
-
             <div class="services-1">
                 <svg class="svc-icon" viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M12 3c2.6 2.7 4 5 4 7a4 4 0 1 1-8 0c0-2 1.4-4.3 4-7Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
@@ -140,7 +128,6 @@
                     <tr><th>Dermatología</th><td>$30</td></tr>
                 </tbody>
             </table>
-
             @auth
                 <a href="{{ route('paciente.dashboard') }}" class="btn-1">Agendar Cita</a>
             @else
@@ -148,7 +135,6 @@
                 <noscript><a href="{{ route('login') }}" class="btn-1">Agendar Cita</a></noscript>
             @endauth
         </div>
-
         <div class="prices-2"></div>
     </section>
 
@@ -157,7 +143,6 @@
             <h2>Nuestros Doctores</h2>
             <p>Contamos con un equipo médico calificado y comprometido con tu salud y la de tu familia.</p>
         </div>
-
         <div class="personal-group">
             <div class="personal-1">
                 <img src="{{ asset('img/doctora1.jpg') }}" alt="Doctora Dermatóloga">
@@ -180,10 +165,9 @@
         </div>
     </footer>
 
-    {{-- Modal de login --}}
-    <div id="loginModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
+    <div id="loginModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="loginTitle" aria-hidden="true">
         <div class="modal-backdrop"></div>
-        <div class="modal-dialog">
+        <div class="modal-dialog" role="document">
             <div class="panel">
                 <div class="panel-header">
                     <h3 id="loginTitle">Iniciar sesión</h3>
@@ -197,12 +181,11 @@
                         <span data-open-login-onload hidden></span>
                         <div class="alert err">Revisa tus datos e inténtalo nuevamente.</div>
                     @endif
-
                     <form method="POST" action="{{ route('login') }}" id="loginForm">
                         @csrf
                         <div class="field">
                             <label>Correo</label>
-                            <input type="email" name="email" autocomplete="email" required value="{{ old('email') }}" placeholder="correo@ejemplo.com">
+                            <input type="email" name="email" autocomplete="email" required value="{{ old('email') }}" placeholder="correo@ejemplo.com" inputmode="email">
                             @error('email') <p class="error">{{ $message }}</p> @enderror
                         </div>
                         <div class="field">

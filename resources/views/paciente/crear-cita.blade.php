@@ -1,11 +1,21 @@
 @extends('layouts.paciente')
 @section('title', 'Agendar Cita')
 @section('body-class', 'paciente-body--crear-cita')
+
 @push('head')
-    @vite(['resources/css/crear-cita.css', 'resources/js/crear-cita.js'])
+    @vite([
+        'resources/css/paciente/crear-cita.css',
+        'resources/js/sidebar-toggle.js',
+        'resources/js/paciente/crear-cita.js'
+    ])
 @endpush
+
 @section('main')
     <div class="crear-cita-page">
+        <div class="mobile-topbar">
+            <button id="menu_bar" aria-label="Abrir menú"><span class="material-symbols-sharp">menu</span></button>
+        </div>
+
         <div class="card">
             <div class="card-header">
                 <div class="header-panel">
@@ -19,17 +29,19 @@
                     </div>
                 </div>
             </div>
+
             <div class="card-body">
                 @if ($errors->has('error'))
                     <div class="alert">{{ $errors->first('error') }}</div>
                 @endif
+
                 <form method="POST" action="{{ route('paciente.crear-cita.store') }}"
                       data-endpoint-template="{{ route('especialidades.doctores', ['especialidad' => 'ESP_ID']) }}"
                       data-old-esp="{{ old('especialidad_id') }}"
                       data-old-doc="{{ old('doctor_id') }}"
-                      {{-- NUEVO: plantilla de URL para la tarifa del doctor --}}
                       data-tarifa-template="{{ route('api.tarifa.doctor.show', ['id' => 'DOC_ID']) }}">
                     @csrf
+
                     <div class="form-grid">
                         <div class="col-span-2">
                             <label for="especialidad_id">Especialidad</label>
@@ -70,7 +82,6 @@
                             </div>
                             @error('doctor_id')<span class="error">{{ $message }}</span>@enderror
 
-                            {{-- NUEVO: panel para mostrar la tarifa del doctor seleccionado --}}
                             <div id="tarifaPanel" class="tarifa-panel" aria-live="polite" hidden>
                                 <span id="tarifaLabel">Tarifa: —</span>
                             </div>
@@ -108,6 +119,7 @@
                             <div class="help">Formato de 24 horas.</div>
                         </div>
                     </div>
+
                     <div class="actions">
                         <button type="submit" class="btn btn-primary">Registrar Cita</button>
                         <a href="{{ route('paciente.citas') }}" class="btn btn-ghost">Cancelar</a>
@@ -116,20 +128,4 @@
             </div>
         </div>
     </div>
-
-    {{-- estilos mínimos para el panel de tarifa --}}
-    <style>
-        .tarifa-panel{
-            margin-top: .6rem;
-            border:1px dashed #cbd5e1;
-            background:#f8fafc;
-            padding:.6rem .8rem;
-            border-radius:12px;
-            font-weight:700;
-            color:#0f172a;
-        }
-        .tarifa-panel.is-warning{
-            border-color:#fecaca; background:#fff1f2; color:#b91c1c;
-        }
-    </style>
 @endsection

@@ -92,7 +92,6 @@ class AdminController extends Controller
         ]);
     }
 
-    /* ================== Citas – Listado ================== */
     public function citasIndex(Request $request)
     {
         $doctorId = Auth::id();
@@ -106,9 +105,6 @@ class AdminController extends Controller
         return view('doctor.citas', compact('citas'));
     }
 
-    /* ================== Acciones sobre una cita ================== */
-
-    /** Localiza una cita que pertenezca al doctor actual o 404 */
     private function findOwnedCitaOrFail(int $id): Cita
     {
         return Cita::where('id', $id)
@@ -116,7 +112,6 @@ class AdminController extends Controller
             ->firstOrFail();
     }
 
-    /** Aceptar -> pasa de pendiente a confirmada */
     public function aceptar(int $id)
     {
         $cita = $this->findOwnedCitaOrFail($id);
@@ -131,7 +126,6 @@ class AdminController extends Controller
         return back()->with('success', 'Cita aceptada correctamente.');
     }
 
-    /** Rechazar -> pasa de pendiente a cancelada */
     public function rechazar(int $id)
     {
         $cita = $this->findOwnedCitaOrFail($id);
@@ -146,7 +140,6 @@ class AdminController extends Controller
         return back()->with('success', 'Cita rechazada.');
     }
 
-    /** Marcar como realizada -> desde pendiente o confirmada */
     public function realizada(int $id)
     {
         $cita = $this->findOwnedCitaOrFail($id);
@@ -160,8 +153,6 @@ class AdminController extends Controller
 
         return back()->with('success', 'Cita marcada como realizada.');
     }
-
-    /* ================== Perfil ================== */
 
     public function editarPerfil()
     {
@@ -182,7 +173,6 @@ class AdminController extends Controller
             'fecha_nacimiento'  => ['required','date','before:today'],
             'sexo'              => ['nullable','in:Masculino,Femenino,Otro'],
             'avatar'            => ['nullable','image','mimes:jpg,jpeg,png,webp','max:2048'],
-            // NUEVO:
             'precio_consulta'   => ['nullable','numeric','min:0','max:99999999.99'],
             'moneda'            => ['nullable','in:USD'],
         ], [
@@ -199,7 +189,6 @@ class AdminController extends Controller
             'avatar.mimes'                  => 'Formatos permitidos: JPG, JPEG, PNG o WEBP.',
             'avatar.max'                    => 'La imagen no debe exceder 2 MB.',
             'sexo.in'                       => 'Seleccione un sexo válido.',
-            // Nuevos:
             'precio_consulta.numeric'       => 'El precio debe ser numérico.',
             'precio_consulta.min'           => 'El precio no puede ser negativo.',
             'moneda.in'                     => 'Moneda inválida (fijo: USD).',

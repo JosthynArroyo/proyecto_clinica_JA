@@ -1,12 +1,16 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap');
 @import 'tailwindcss';
+
 *{margin:0;padding:0;box-sizing:border-box;text-decoration:none;list-style:none}
 @keyframes fadeInPage{0%{opacity:0;transform:translateY(20px)}100%{opacity:1;transform:translateY(0)}}
 html,body{overflow-x:hidden}
 body{font-family:'Poppins',system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial,sans-serif;background-color:#f3f3f3;color:#1f2937;animation:fadeInPage 2s ease-out both}
+
 .container{max-width:1200px;margin:0 auto}
-.header{position:relative;background-image:url('../img/clinicalosangeles.jpg');background-size:cover;background-position:center;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px 20px;z-index:0;overflow:hidden}
+
+.header{position:relative;background-image:url('../img/clinicalosangeles.jpg');background-size:cover;background-position:center;min-height:100svh;display:flex;align-items:center;justify-content:center;padding:40px 20px;z-index:0;overflow:hidden}
 .header::before{content:"";position:absolute;inset:0;background:rgba(45,45,45,.55);z-index:-1}
+
 .menu{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;z-index:1000;padding:20px 40px}
 .logo{font-size:24px;color:#fff;font-weight:800;text-transform:uppercase;text-shadow:1px 1px 4px rgba(0,0,0,.45)}
 .menu .navbar ul li{position:relative;float:left}
@@ -15,22 +19,27 @@ body{font-family:'Poppins',system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial,
 #menu{display:none}
 .menu-icono{width:25px}
 .menu label{cursor:pointer;display:none}
+
 .header-txt{text-align:center;margin-bottom:45px;z-index:10}
 .header-txt h1{font-size:90px;letter-spacing:5px;text-transform:uppercase;color:#e5e5e5;text-shadow:3px 3px 8px rgba(0,0,0,.55);margin-bottom:15px;margin-top:45px}
 .header-txt span{font-size:25px;color:#d1d1d1;display:block;text-shadow:2px 2px 6px rgba(0,0,0,.45)}
 .header-txt p{color:#ededed;max-width:700px;margin:25px auto;padding:0 20px;font-size:18px;text-shadow:1px 1px 6px rgba(0,0,0,.5)}
 .btn-1{display:inline-block;padding:11px 25px;background-color:#4b5563;color:#fff;text-transform:uppercase;letter-spacing:2px;font-size:20px;margin:25px 0;border:0;border-radius:8px;box-shadow:0 10px 24px rgba(100,100,100,.28);transition:background .25s ease}
 .btn-1:hover{background-color:#6b7280}
+
 .header-dir{display:flex;justify-content:space-around;align-items:center;text-align:center;flex-wrap:wrap;margin-top:40px;gap:20px}
 .dir{flex:1 1 250px;padding:10px 20px;max-width:300px}
 .dir h3{font-size:18px;color:#fff;text-transform:uppercase;margin-bottom:10px;text-shadow:1px 1px 4px rgba(0,0,0,.45)}
 .dir p{font-size:18px;color:#f5f5f5;word-wrap:break-word;line-height:1.4;text-shadow:1px 1px 4px rgba(0,0,0,.45)}
+
 .welcome{display:flex;overflow:hidden}
 .welcome-1{background-image:url('../img/imagen_2.jpg');background-position:center;background-repeat:no-repeat;background-size:cover;width:50%}
 .welcome-2{width:50%;padding:150px 180px 150px 100px;background-color:#e5e5e5;display:flex;flex-direction:column;justify-content:center}
+
 h2{font-size:60px;line-height:1.2;color:#374151;text-transform:uppercase;margin-bottom:20px;word-break:break-word;hyphens:auto}
 p{font-size:16px;color:#374151}
 .b1{color:#4b5563}
+
 .services{padding:100px 0;text-align:center;background-color:#fff}
 .services-txt{display:flex;flex-direction:column;align-items:center}
 hr{border:1px solid #9ca3af;width:80px}
@@ -42,6 +51,7 @@ hr{border:1px solid #9ca3af;width:80px}
 .services-1 p{color:#475569}
 .svc-icon{width:38px;height:38px;color:#6b7280;display:block}
 .svc-icon path,.svc-icon circle{stroke:currentColor}
+
 .prices{display:flex;background-color:#e5e5e5;overflow:hidden}
 .prices-1{width:50%;padding:150px 180px 150px 100px;display:flex;flex-direction:column;justify-content:center}
 table{margin:50px 0;width:100%;border-collapse:collapse}
@@ -49,6 +59,7 @@ tr{display:flex;justify-content:space-between;border-bottom:1px solid #9ca3af;ma
 th{color:#111827;padding-bottom:15px}
 td{color:#4b5563}
 .prices-2{background-image:url('../img/imagen_3.jpg');background-position:center;background-repeat:no-repeat;background-size:cover;width:50%}
+
 .personal{padding:100px 0;text-align:center;background-color:#fff}
 .personal-txt{display:flex;flex-direction:column;align-items:center;text-align:center;margin-bottom:25px}
 .personal-group{display:flex;justify-content:center;gap:20px;flex-wrap:wrap;padding:20px}
@@ -56,16 +67,24 @@ td{color:#4b5563}
 .personal-1:hover{background-color:#e5e7eb}
 .personal-1 img{width:120px;height:120px;object-fit:cover;border-radius:8px;display:block;margin:0 auto 15px}
 .personal-1 p{padding:0 20px;color:#475569;font-size:15px;margin-bottom:0}
-/* CORRECCIÓN: solo el footer y sus p en blanco */
+
 .footer-txt{text-align:center;padding:20px;background-color:#111827;color:#d1d5db;font-size:14px}
-.footer-txt, .footer-txt p{color:#e5e5e5}
+.footer-txt,.footer-txt p{color:#e5e5e5}
 div.personal-txt p{color:#1a1c1f}
+
+@media (max-width:1400px){
+  .header-txt h1{font-size:78px}
+  .welcome-2{padding:130px 130px 130px 90px}
+  .prices-1{padding:130px 130px 130px 90px}
+}
+
 @media (max-width:1200px){
   .header-txt h1{font-size:72px}
   .welcome-2{padding:120px 120px 120px 80px}
   .prices-1{padding:120px 120px 120px 80px}
   .services-txt p{padding:40px 80px}
 }
+
 @media (max-width:1024px){
   .header-txt h1{font-size:60px}
   .header-txt span{font-size:20px}
@@ -73,16 +92,18 @@ div.personal-txt p{color:#1a1c1f}
   .prices-1{padding:100px 80px}
   .services-txt p{padding:30px 60px}
 }
+
 @media (max-width:992px){
-  .welcome-2, .prices-1{ text-align:center }
-  .welcome-2 h2, .prices-1 h2{ margin:0 auto 20px }
+  .welcome-2,.prices-1{text-align:center}
+  .welcome-2 h2,.prices-1 h2{margin:0 auto 20px}
   .prices-1 table{margin-left:auto;margin-right:auto;width:90%}
   .prices-1 tr{justify-content:center;gap:40px}
-  .prices-1 td, .prices-1 th{text-align:center}
+  .prices-1 td,.prices-1 th{text-align:center}
 }
+
 @media (max-width:768px){
   .menu label{display:block}
-  .menu .navbar{position:absolute;top:100%;left:0;right:0;background:rgba(0,0,0,.9);display:none;flex-direction:column}
+  .menu .navbar{position:absolute;top:100%;left:0;right:0;background:rgba(0,0,0,.9);display:none;flex-direction:column;z-index:1000}
   .menu .navbar ul{flex-direction:column;width:100%}
   .menu .navbar ul li{width:100%}
   .menu .navbar ul li a{padding:15px;text-align:center;display:block}
@@ -91,26 +112,27 @@ div.personal-txt p{color:#1a1c1f}
   .header-txt p{font-size:16px}
   .welcome{flex-direction:column}
   .welcome-1,.welcome-2{width:100%;padding:60px 30px}
-  .welcome-2{ text-align:center }
-  .welcome-2 h2{ margin:0 auto 20px }
+  .welcome-2{text-align:center}
+  .welcome-2 h2{margin:0 auto 20px}
   .prices{flex-direction:column}
   .prices-1,.prices-2{width:100%;padding:60px 30px}
-  .prices-1{ text-align:center }
-  .prices-1 h2{ margin:0 auto 20px }
+  .prices-1{text-align:center}
+  .prices-1 h2{margin:0 auto 20px}
   .prices-1 table{margin:20px auto;width:90%}
   .prices-1 tr{justify-content:center;gap:30px}
-  .prices-1 td, .prices-1 th{text-align:center}
+  .prices-1 td,.prices-1 th{text-align:center}
   .services-group{flex-direction:column;align-items:center}
   .services-1{margin:12px 0;width:90%}
   .header-dir{flex-direction:column}
 }
-@media (max-width:480px){
+
+@media (max-width:640px){
   .menu{padding:10px 20px}
   .logo{font-size:18px}
-  .header-txt h1{font-size:35px}
+  .header-txt h1{font-size:36px}
   .header-txt span{font-size:16px}
   .header-txt p{font-size:14px}
-  h2{font-size:35px}
+  h2{font-size:34px}
   .btn-1{font-size:16px;padding:10px 18px}
   .services-txt p{padding:20px}
   .personal-1{width:100%}
@@ -118,59 +140,36 @@ div.personal-txt p{color:#1a1c1f}
   .dir p{font-size:15px}
 }
 
-/* ...todo tu CSS anterior... */
-
-/* === Modal === */
-.modal{
-  position:fixed;
-  inset:0;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  z-index:2147483647; /* por si algún stacking context enorme existiera */
-  padding:16px;
-}
-.modal.is-open{ display:flex !important; }
-
-.modal-backdrop{
-  position:absolute;
-  inset:0;
-  background:rgba(0,0,0,.6);
-  backdrop-filter:blur(2px);
-  z-index:0;
-}
-
-.modal-dialog{
-  position:relative;
-  z-index:1;
-  width:100%;
-  max-width:520px;
-}
-
-.panel{
-  position:relative;
-  z-index:2; /* asegurar por encima del backdrop */
-  width:100%;
-  background:#fff;
-  border-radius:12px;
-  box-shadow:0 20px 60px rgba(0,0,0,.25);
-  overflow:hidden;
-}
-
+/* Modal */
+.modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:2147483647;padding:16px}
+.modal.is-open{display:flex!important}
+.modal-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(2px);z-index:0}
+.modal-dialog{position:relative;z-index:1;width:100%;max-width:520px}
+.panel{position:relative;z-index:2;width:100%;background:#fff;border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.25);overflow:hidden;max-height:calc(100dvh - 32px)}
 .panel-header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid #e5e7eb}
-.panel-body{padding:20px}
+.panel-body{padding:20px;overflow:auto;max-height:calc(100dvh - 72px)}
 .close-btn{background:none;border:0;font-size:20px;line-height:1;padding:6px 8px;border-radius:8px;cursor:pointer}
 .close-btn:hover{background:#f3f4f6}
 .field{margin-bottom:12px}
 .field label{display:block;font-size:14px;color:#374151;margin-bottom:6px}
-.field input[type="email"], .field input[type="password"]{width:100%;border:1px solid #d1d5db;border-radius:10px;padding:10px 12px;font-size:15px}
+.field input[type="email"],.field input[type="password"]{width:100%;border:1px solid #d1d5db;border-radius:10px;padding:10px 12px;font-size:15px}
 .error{margin-top:6px;font-size:12px;color:#b91c1c}
 .row{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:14px;color:#4b5563;margin:8px 0}
 .submit{width:100%;border:0;background:#1f2937;color:#fff;font-weight:600;border-radius:12px;padding:10px 14px;cursor:pointer}
 .submit:hover{background:#374151}
 .alert.ok{background:#ecfdf5;color:#065f46;border-radius:8px;padding:8px 10px;margin-bottom:10px;font-size:14px}
 .alert.err{background:#fef2f2;color:#991b1b;border-radius:8px;padding:8px 10px;margin-bottom:10px;font-size:14px}
+body.modal-open{overflow:hidden;height:100dvh}
 
-/* Bloqueo de scroll cuando el modal está abierto */
-body.modal-open{ overflow:hidden; }
+@media (max-width:768px){
+  .modal{padding:12px}
+  .modal-dialog{max-width:520px}
+  .panel{border-radius:12px;max-height:calc(100dvh - 24px)}
+  .panel-body{max-height:calc(100dvh - 68px)}
+}
 
+@media (max-width:640px){
+  .modal{padding:10px}
+  .panel{border-radius:12px;max-height:calc(100dvh - 20px)}
+  .panel-body{max-height:calc(100dvh - 64px)}
+}

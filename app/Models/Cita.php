@@ -21,12 +21,11 @@ class Cita extends Model
         'activo',
     ];
 
-    const ESTADO_PENDIENTE   = 'pendiente';
-    const ESTADO_CONFIRMADA  = 'confirmada';
-    const ESTADO_CANCELADA   = 'cancelada';
-    const ESTADO_REALIZADA   = 'realizada';
+    public const ESTADO_PENDIENTE  = 'pendiente';
+    public const ESTADO_CONFIRMADA = 'confirmada';
+    public const ESTADO_CANCELADA  = 'cancelada';
+    public const ESTADO_REALIZADA  = 'realizada';
 
-   
     public const ESTADOS = [
         self::ESTADO_PENDIENTE,
         self::ESTADO_CONFIRMADA,
@@ -34,10 +33,9 @@ class Cita extends Model
         self::ESTADO_REALIZADA,
     ];
 
-    
     protected $casts = [
-        'fecha' => 'date',
-        'hora'  => 'string',
+        'fecha'  => 'date',
+        'hora'   => 'string',
         'activo' => 'boolean',
     ];
 
@@ -54,5 +52,17 @@ class Cita extends Model
     public function especialidad()
     {
         return $this->belongsTo(Especialidad::class);
+    }
+
+    /** Relación con factura (una factura por cita) */
+    public function factura()
+    {
+        return $this->hasOne(Factura::class, 'cita_id');
+    }
+
+    /** Relación con receta (una receta por cita) */
+    public function receta()
+    {
+        return $this->hasOne(Receta::class, 'cita_id');
     }
 }

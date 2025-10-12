@@ -1,9 +1,9 @@
 <?php
-// routes/web.php
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+
 use App\Http\Controllers\CitaController;
 use App\Http\Controllers\Admin\AdminController as AdminDashboardController;
 use App\Http\Controllers\ExportCitasController;
@@ -11,18 +11,45 @@ use App\Http\Controllers\Paciente\AdminController as PacienteDashboardController
 use App\Http\Controllers\Doctor\AdminController as DoctorDashboardController;
 use App\Http\Controllers\ContactoController;
 use App\Http\Controllers\Api\TarifaController;
+use App\Http\Controllers\Doctor\RecetaController;
+use App\Http\Controllers\EmailCitaActionController;
 
+/*
+|--------------------------------------------------------------------------
+| API TARIFAS
+|--------------------------------------------------------------------------
+*/
 Route::get('/api/tarifa/doctor/{id}', [TarifaController::class, 'precioDoctor'])
     ->whereNumber('id')
     ->name('api.tarifa.doctor.show');
 
+/*
+|--------------------------------------------------------------------------
+| PÁGINA PRINCIPAL
+|--------------------------------------------------------------------------
+*/
 Route::get('/', fn() => view('welcome'));
 
+/*
+|--------------------------------------------------------------------------
+| AUTENTICACIÓN
+|--------------------------------------------------------------------------
+*/
 Auth::routes(['register' => false]);
 
+/*
+|--------------------------------------------------------------------------
+| RELACIÓN ESPECIALIDADES - DOCTORES
+|--------------------------------------------------------------------------
+*/
 Route::get('/especialidades/{especialidad}/doctores', [AdminDashboardController::class, 'doctoresPorEspecialidad'])
     ->name('especialidades.doctores');
 
+/*
+|--------------------------------------------------------------------------
+| HOME REDIRECCIONA SEGÚN ROL
+|--------------------------------------------------------------------------
+*/
 Route::get('/home', function () {
     if (!Auth::check()) return redirect('/');
     $u = Auth::user();
@@ -32,9 +59,37 @@ Route::get('/home', function () {
     return redirect('/');
 })->name('home');
 
-Route::get('/contacto', [ContactoController::class, 'mostrarFormulario'])->name('contacto.form');
+/*
+|--------------------------------------------------------------------------
+| CONTACTO Y AGENDAMIENTO PÚBLICO
+|--------------------------------------------------------------------------
+|
+| - /contacto redirige al nuevo formulario público de agendamiento
+| - /contacto/guest muestra el formulario para invitados
+| - /contacto/guest (POST) procesa la solicitud de cita
+|
+*/
+Route::get('/contacto', fn() => redirect()->route('contacto.guest'))->name('contacto.form');
 Route::post('/contacto', [ContactoController::class, 'enviarFormulario'])->name('contacto.enviar');
 
+Route::get('/contacto/guest', [CitaController::class, 'guestForm'])->name('contacto.guest');
+Route::post('/contacto/guest', [CitaController::class, 'guestStore'])->name('contacto.guest.store');
+
+/*
+|--------------------------------------------------------------------------
+| ACCIONES DESDE EMAIL (RUTAS FIRMADAS)
+|--------------------------------------------------------------------------
+*/
+Route::middleware('signed')->get('/email/cita/{cita}/{rol}/{accion}', EmailCitaActionController::class)
+    ->where('rol', '^(paciente|doctor)$')
+    ->where('accion', '^(aceptar|cancelar)$')
+    ->name('email.cita.action');
+
+/*
+|--------------------------------------------------------------------------
+| PANEL ADMINISTRADOR
+|--------------------------------------------------------------------------
+*/
 Route::middleware(['auth', 'role:administrador'])->prefix('admin')->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'dashboard'])->name('admin.dashboard');
     Route::get('/dashboard/resumen', [AdminDashboardController::class, 'resumenGlobal'])->name('admin.dashboard.resumen');
@@ -50,32 +105,59 @@ Route::middleware(['auth', 'role:administrador'])->prefix('admin')->group(functi
     Route::get('/citas/export', [ExportCitasController::class, 'exportarCitas'])->name('admin.citas.export');
 });
 
+/*
+|--------------------------------------------------------------------------
+| PANEL PACIENTE
+|--------------------------------------------------------------------------
+*/
 Route::middleware(['auth', 'role:paciente'])->prefix('paciente')->group(function () {
     Route::get('/dashboard', [PacienteDashboardController::class, 'dashboard'])->name('paciente.dashboard');
     Route::get('/perfil', [PacienteDashboardController::class, 'editarPerfil'])->name('paciente.perfil.edit');
     Route::post('/perfil', [PacienteDashboardController::class, 'actualizarPerfil'])->name('paciente.perfil.update');
+
     Route::get('/citas', [CitaController::class, 'index'])->name('paciente.citas');
     Route::get('/crear-cita', [CitaController::class, 'create'])->name('paciente.crear-cita');
     Route::post('/crear-cita', [CitaController::class, 'store'])->name('paciente.crear-cita.store');
+
     Route::post('/citas/{id}/cancelar', [CitaController::class, 'cancelar'])->name('paciente.citas.cancelar');
+
     Route::get('/editar-cita/{id}', [CitaController::class, 'edit'])->name('paciente.editar-cita');
-    Route::post('/editar-cita/{id}', [CitaController::class, 'actualizar'])->name('paciente.editar-cita.update');
+    Route::put('/editar-cita/{id}', [CitaController::class, 'actualizar'])->name('paciente.editar-cita.update');
+
     Route::view('/historial', 'paciente.historial')->name('paciente.historial');
     Route::view('/mensajes', 'paciente.mensajes')->name('paciente.mensajes');
 });
 
+/*
+|--------------------------------------------------------------------------
+| PANEL DOCTOR
+|--------------------------------------------------------------------------
+*/
 Route::middleware(['auth', 'role:doctor'])->prefix('doctor')->group(function () {
     Route::get('/dashboard', [DoctorDashboardController::class, 'dashboard'])->name('doctor.dashboard');
     Route::get('/perfil', [DoctorDashboardController::class, 'editarPerfil'])->name('doctor.perfil.edit');
     Route::post('/perfil', [DoctorDashboardController::class, 'actualizarPerfil'])->name('doctor.perfil.update');
+
     Route::get('/citas', [CitaController::class, 'indexDoctor'])->name('doctor.citas');
     Route::post('/citas/{id}/aceptar', [CitaController::class, 'aceptar'])->name('doctor.citas.aceptar');
     Route::post('/citas/{id}/rechazar', [CitaController::class, 'rechazar'])->name('doctor.citas.rechazar');
     Route::post('/citas/{id}/realizar', [CitaController::class, 'realizar'])->name('doctor.citas.realizar');
     Route::get('/dashboard/data', [DoctorDashboardController::class, 'dashboardData'])->name('doctor.dashboard.data');
+
+    Route::get('/recetas', [RecetaController::class, 'index'])->name('doctor.recetas.index');
+    Route::get('/recetas/crear/{cita}', [RecetaController::class, 'create'])->name('doctor.recetas.create');
+    Route::post('/recetas', [RecetaController::class, 'store'])->name('doctor.recetas.store');
+    Route::get('/recetas/editar/{cita}', [RecetaController::class, 'edit'])->name('doctor.recetas.edit');
+    Route::post('/recetas/actualizar', [RecetaController::class, 'update'])->name('doctor.recetas.update');
+    Route::post('/recetas/reenviar/{cita}', [RecetaController::class, 'resend'])->name('doctor.recetas.resend');
+    Route::get('/recetas/descargar/{cita}', [RecetaController::class, 'download'])->name('doctor.recetas.download');
 });
 
-
+/*
+|--------------------------------------------------------------------------
+| CIERRE DE SESIÓN
+|--------------------------------------------------------------------------
+*/
 Route::post('/salir', function (Request $request) {
     Auth::logout();
     $request->session()->invalidate();
@@ -92,7 +174,9 @@ Route::get('/salir', function (Request $request) {
     return redirect('/');
 })->name('salir.get');
 
-
-Route::get('/login', function () {
-    return redirect('/?login=1');
-})->name('login');
+/*
+|--------------------------------------------------------------------------
+| LOGIN REDIRIGIDO AL INICIO
+|--------------------------------------------------------------------------
+*/
+Route::get('/login', fn() => redirect('/?login=1'))->name('login');
