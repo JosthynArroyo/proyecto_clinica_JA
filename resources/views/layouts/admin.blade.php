@@ -5,8 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>@yield('title','Panel Administrativo - Clínica Los Ángeles')</title>
 
+  {{-- Iconos --}}
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Sharp" rel="stylesheet" />
+
+  {{-- URL para AJAX de KPIs (la leen los JS externos) --}}
+  <meta name="dashboard-resumen-url" content="{{ route('admin.dashboard.resumen') }}">
 
   @vite(['resources/css/dashboards/admin.css', 'resources/js/dashboard-admin.js', 'resources/js/dashboard-admin-extras.js'])
   @stack('head')
@@ -59,24 +63,30 @@
   </aside>
 
   <main>
-    @yield('main')  
+    @yield('main')
   </main>
 
   @if($hasRight)
     <div class="right">
       <div class="top">
         <button id="menu_bar"><span class="material-symbols-sharp">menu</span></button>
-        <div class="theme-toggler">
-          <span class="material-symbols-sharp active">light_mode</span>
-          <span class="material-symbols-sharp">dark_mode</span>
-        </div>
-        <div class="profile">
-          <div class="info">
-            <p><b>{{ Auth::user()->name ?? 'Admin' }}</b></p>
-            <p>Panel Clínico</p>
+
+        <div class="right-controls">
+          <div class="theme-toggler">
+            <span class="material-symbols-sharp active">light_mode</span>
+            <span class="material-symbols-sharp">dark_mode</span>
           </div>
-          <div class="profile-photo">
-            <img src="{{ Auth::user()->avatar ? asset('storage/'.Auth::user()->avatar) : asset('img/doctor1.jpg') }}" alt="Foto">
+
+          <div class="profile">
+            <div class="info">
+              <p class="name"><b>{{ Auth::user()->name ?? 'Admin' }}</b></p>
+              <p class="role">Panel Clínico</p>
+            </div>
+            <div class="profile-photo">
+              <img
+                src="{{ Auth::user()->avatar ? asset('storage/'.Auth::user()->avatar) : asset('img/doctor1.jpg') }}"
+                alt="Foto de perfil">
+            </div>
           </div>
         </div>
       </div>
