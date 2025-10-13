@@ -30,8 +30,9 @@
         </a>
 
         <form id="logout-form" action="{{ route('salir') }}" method="POST" style="display:none;">@csrf</form>
-      <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-        <span class="material-symbols-outlined">logout</span><h3>Cerrar Sesión</h3>
-      </a>
+        <a href="#" class="logout-link" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+            <span class="material-symbols-outlined">logout</span>
+            <h3>Cerrar Sesión</h3>
+        </a>
     </div>
 </aside>

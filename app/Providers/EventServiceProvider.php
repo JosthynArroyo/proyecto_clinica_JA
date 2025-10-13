@@ -2,28 +2,30 @@
 
 namespace App\Providers;
 
+use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use App\Events\CitaAgendada;
 use App\Listeners\NotificarDoctorListener;
-use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
+use App\Listeners\CrearFacturaBorrador;
 
 class EventServiceProvider extends ServiceProvider
 {
     /**
-     * The event to listener mappings for the application.
-     *
-     * @var array<class-string, array<int, class-string>>
+     * Los listeners para los eventos de la aplicación.
      */
     protected $listen = [
         CitaAgendada::class => [
             NotificarDoctorListener::class,
+            CrearFacturaBorrador::class,
         ],
     ];
 
-    /**
-     * Register any events for your application.
-     */
     public function boot(): void
     {
         //
+    }
+
+    public function shouldDiscoverEvents(): bool
+    {
+        return false;
     }
 }

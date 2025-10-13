@@ -1,4 +1,3 @@
-{{-- resources/views/layouts/paciente.blade.php --}}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -8,7 +7,7 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Sharp" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap">
-    @vite(['resources/css/dashboards/paciente.css', 'resources/js/sidebar-toggle.js'])
+    @vite(['resources/css/paciente/paciente.css', 'resources/js/sidebar-toggle.js'])
     @stack('head')
 </head>
 <body class="paciente-body @yield('body-class')">
@@ -23,7 +22,6 @@
                 @yield('main')
             </main>
 
-            {{-- Renderizar panel derecho SOLO si la vista define @section('right') --}}
             @if($hasRight)
                 <div class="right">
                     <div class="top">

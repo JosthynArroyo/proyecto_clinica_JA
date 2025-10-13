@@ -10,28 +10,92 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\QueryException;
 use App\Jobs\EnviarConfirmacionCitaJob;
+use App\Jobs\NotificarCambioEstadoCitaJob;
 use App\Events\CitaAgendada;
+use App\Events\CitaAtendida;
 use Carbon\Carbon;
 
 class CitaController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $citas = Cita::where('paciente_id', Auth::id())
-            ->with(['doctor', 'especialidad'])
-            ->get();
+        $userId = Auth::id();
+        $q = trim((string) $request->get('q', ''));
+        $estado = (string) $request->get('estado', '');
+        $validStates = ['pendiente','confirmada','cancelada','realizada'];
+        $qNorm = mb_strtolower($q);
 
-        return view('paciente.citas', compact('citas'));
+        $totalesPorEstado = Cita::where('paciente_id', $userId)
+            ->select('estado', DB::raw('count(*) as total'))
+            ->groupBy('estado')
+            ->pluck('total', 'estado');
+
+        $citas = Cita::with(['doctor:id,name', 'especialidad:id,nombre'])
+            ->where('paciente_id', $userId)
+            ->when($q !== '', function ($query) use ($qNorm) {
+                $query->where(function ($qq) use ($qNorm) {
+                    $qq->whereHas('doctor', function ($dq) use ($qNorm) {
+                        $dq->whereRaw('LOWER(name) LIKE ?', ['%'.$qNorm.'%']);
+                    })->orWhereHas('especialidad', function ($eq) use ($qNorm) {
+                        $eq->whereRaw('LOWER(nombre) LIKE ?', ['%'.$qNorm.'%']);
+                    });
+                });
+            })
+            ->when(in_array($estado, $validStates, true), function ($query) use ($estado) {
+                $query->where('estado', $estado);
+            })
+            ->orderBy('fecha', 'desc')
+            ->orderBy('hora', 'desc')
+            ->paginate(10)
+            ->withQueryString();
+
+        $emptyMessage = null;
+
+        if ($citas->count() === 0) {
+            if ($q !== '' && in_array($estado, $validStates, true)) {
+                $doctorExists = User::whereHas('roles', function ($r) { $r->where('name', 'doctor'); })
+                    ->whereRaw('LOWER(name) LIKE ?', ['%'.$qNorm.'%'])
+                    ->exists();
+                $especialidadExists = Especialidad::whereRaw('LOWER(nombre) LIKE ?', ['%'.$qNorm.'%'])->exists();
+
+                if ($especialidadExists && !$doctorExists) {
+                    $emptyMessage = 'No tienes cita en la especialidad "'.$q.'" con estado '.ucfirst($estado).'.';
+                } elseif ($doctorExists && !$especialidadExists) {
+                    $emptyMessage = 'No tienes cita con el doctor "'.$q.'" en estado '.ucfirst($estado).'.';
+                } elseif (!$doctorExists && !$especialidadExists) {
+                    $emptyMessage = 'No existe la especialidad "'.$q.'" ni un doctor con ese nombre en estado '.ucfirst($estado).'.';
+                } else {
+                    $emptyMessage = 'No hay coincidencias para "'.$q.'" en estado '.ucfirst($estado).'.';
+                }
+            } elseif ($q !== '') {
+                $doctorExists = User::whereHas('roles', function ($r) { $r->where('name', 'doctor'); })
+                    ->whereRaw('LOWER(name) LIKE ?', ['%'.$qNorm.'%'])
+                    ->exists();
+                $especialidadExists = Especialidad::whereRaw('LOWER(nombre) LIKE ?', ['%'.$qNorm.'%'])->exists();
+
+                if ($especialidadExists && !$doctorExists) {
+                    $emptyMessage = 'No tienes cita agendada en la especialidad "'.$q.'".';
+                } elseif ($doctorExists && !$especialidadExists) {
+                    $emptyMessage = 'No tienes cita agendada con el doctor "'.$q.'".';
+                } elseif (!$doctorExists && !$especialidadExists) {
+                    $emptyMessage = 'No existe la especialidad "'.$q.'" ni un doctor con ese nombre.';
+                } else {
+                    $emptyMessage = 'No tienes citas que coincidan con "'.$q.'".';
+                }
+            } elseif (in_array($estado, $validStates, true)) {
+                $emptyMessage = 'No tienes citas en estado '.ucfirst($estado).'.';
+            } else {
+                $emptyMessage = 'No tienes citas registradas.';
+            }
+        }
+
+        return view('paciente.citas', compact('citas', 'emptyMessage', 'totalesPorEstado'));
     }
 
     public function create()
     {
-        $doctores = User::whereHas('roles', function ($q) {
-            $q->where('name', 'doctor');
-        })->get();
-
+        $doctores = User::whereHas('roles', function ($q) { $q->where('name', 'doctor'); })->get();
         $especialidades = Especialidad::all();
-
         return view('paciente.crear-cita', compact('doctores', 'especialidades'));
     }
 
@@ -80,37 +144,32 @@ class CitaController extends Controller
         });
 
         if ($existe) {
-            return back()->withErrors([
-                'error' => 'El doctor ya tiene una cita en ese horario o en un rango de 30 minutos.'
-            ])->withInput();
+            return back()->withErrors(['error' => 'El doctor ya tiene una cita en ese horario o en un rango de 30 minutos.'])->withInput();
         }
 
         try {
             DB::beginTransaction();
 
             $cita = Cita::create([
-                'paciente_id' => Auth::id(),
-                'doctor_id' => $request->doctor_id,
-                'especialidad_id' => $request->especialidad_id,
-                'fecha' => $request->fecha,
-                'hora' => $slot->format('H:i:00'),
-                'estado' => Cita::ESTADO_PENDIENTE,
-                'activo' => true,
+                'paciente_id'      => Auth::id(),
+                'doctor_id'        => $request->doctor_id,
+                'especialidad_id'  => $request->especialidad_id,
+                'fecha'            => $request->fecha,
+                'hora'             => $slot->format('H:i:00'),
+                'estado'           => Cita::ESTADO_PENDIENTE,
+                'activo'           => true,
             ]);
 
             DB::commit();
         } catch (QueryException $e) {
             DB::rollBack();
-            return back()->withErrors([
-                'error' => 'El doctor ya tiene una cita exactamente a esa hora.'
-            ])->withInput();
+            return back()->withErrors(['error' => 'El doctor ya tiene una cita exactamente a esa hora.'])->withInput();
         }
 
         event(new CitaAgendada($cita));
         EnviarConfirmacionCitaJob::dispatch($cita);
 
-        return redirect()->route('paciente.citas')
-            ->with('success', 'Cita creada con éxito. Confirmación enviada y doctor notificado.');
+        return redirect()->route('paciente.citas')->with('success', 'Cita creada con éxito. Confirmación enviada y doctor notificado.');
     }
 
     public function cancelar($id)
@@ -127,14 +186,16 @@ class CitaController extends Controller
 
         $cita->estado = Cita::ESTADO_CANCELADA;
         $cita->activo = false;
-        $cita->save();
+               $cita->save();
+
+        NotificarCambioEstadoCitaJob::dispatch($cita, 'cancelada', 'paciente');
 
         return back()->with('success', 'Cita cancelada.');
     }
 
     public function edit($id)
     {
-        $cita = Cita::findOrFail($id);
+        $cita = Cita::with(['doctor','especialidad'])->findOrFail($id);
 
         if ($cita->paciente_id != Auth::id()) {
             return back()->with('error', 'No puedes editar esta cita.');
@@ -158,12 +219,12 @@ class CitaController extends Controller
         $request->validate(
             [
                 'fecha' => 'required|date',
-                'hora' => 'required|date_format:H:i',
+                'hora'  => 'required|date_format:H:i',
             ],
             [
-                'fecha.required' => 'Seleccione una fecha.',
-                'fecha.date' => 'La fecha no es válida.',
-                'hora.required' => 'Ingrese una hora.',
+                'fecha.required'   => 'Seleccione una fecha.',
+                'fecha.date'       => 'La fecha no es válida.',
+                'hora.required'    => 'Ingrese una hora.',
                 'hora.date_format' => 'Formato de hora inválido. Use HH:MM.',
             ]
         );
@@ -193,17 +254,15 @@ class CitaController extends Controller
         });
 
         if ($existe) {
-            return back()->withErrors([
-                'error' => 'El doctor ya tiene una cita en ese horario o en un rango de 30 minutos.'
-            ])->withInput();
+            return back()->withErrors(['error' => 'El doctor ya tiene una cita en ese horario o en un rango de 30 minutos.'])->withInput();
         }
 
         try {
             DB::beginTransaction();
 
             $cita->update([
-                'fecha' => $request->fecha,
-                'hora' => $slot->format('H:i:00'),
+                'fecha'  => $request->fecha,
+                'hora'   => $slot->format('H:i:00'),
                 'estado' => Cita::ESTADO_PENDIENTE,
                 'activo' => true,
             ]);
@@ -211,13 +270,12 @@ class CitaController extends Controller
             DB::commit();
         } catch (QueryException $e) {
             DB::rollBack();
-            return back()->withErrors([
-                'error' => 'El doctor ya tiene una cita exactamente a esa hora.'
-            ])->withInput();
+            return back()->withErrors(['error' => 'El doctor ya tiene una cita exactamente a esa hora.'])->withInput();
         }
 
-        return redirect()->route('paciente.citas')
-            ->with('success', 'Cita reagendada.');
+        NotificarCambioEstadoCitaJob::dispatch($cita, 'reagendada', 'paciente');
+
+        return redirect()->route('paciente.citas')->with('success', 'Cita reagendada.');
     }
 
     public function indexDoctor()
@@ -245,6 +303,8 @@ class CitaController extends Controller
         $cita->activo = true;
         $cita->save();
 
+        NotificarCambioEstadoCitaJob::dispatch($cita, 'aceptada', 'doctor');
+
         return back()->with('success', 'Cita confirmada.');
     }
 
@@ -263,6 +323,8 @@ class CitaController extends Controller
         $cita->estado = Cita::ESTADO_CANCELADA;
         $cita->activo = false;
         $cita->save();
+
+        NotificarCambioEstadoCitaJob::dispatch($cita, 'cancelada', 'doctor');
 
         return back()->with('success', 'Cita rechazada.');
     }
@@ -283,15 +345,18 @@ class CitaController extends Controller
         $cita->activo = true;
         $cita->save();
 
+        event(new CitaAtendida($cita));
+
         return back()->with('success', 'Cita marcada como realizada.');
     }
 
     public function citasConfirmadas()
     {
-        $citas = Cita::with('paciente')->get();
+        $citas = Cita::where('estado', Cita::ESTADO_CONFIRMADA)
+            ->with('paciente:id,name')
+            ->get(['id', 'paciente_id', 'estado']);
 
-        $pacientes = $citas->filter(fn($cita) => $cita->estado === Cita::ESTADO_CONFIRMADA)
-            ->map(fn($cita) => $cita->paciente->name);
+        $pacientes = $citas->pluck('paciente.name');
 
         return response()->json($pacientes);
     }

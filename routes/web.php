@@ -11,6 +11,8 @@ use App\Http\Controllers\Paciente\AdminController as PacienteDashboardController
 use App\Http\Controllers\Doctor\AdminController as DoctorDashboardController;
 use App\Http\Controllers\ContactoController;
 use App\Http\Controllers\Api\TarifaController;
+use App\Http\Controllers\Doctor\RecetaController;
+use App\Http\Controllers\EmailCitaActionController;
 
 Route::get('/api/tarifa/doctor/{id}', [TarifaController::class, 'precioDoctor'])
     ->whereNumber('id')
@@ -35,6 +37,20 @@ Route::get('/home', function () {
 Route::get('/contacto', [ContactoController::class, 'mostrarFormulario'])->name('contacto.form');
 Route::post('/contacto', [ContactoController::class, 'enviarFormulario'])->name('contacto.enviar');
 
+/*
+|--------------------------------------------------------------------------
+| Acciones desde EMAIL (RUTAS FIRMADAS)
+|--------------------------------------------------------------------------
+| NO requieren auth; se protegen con firma y expiración.
+|  - Paciente cancelar: /email/cita/{cita}/paciente/cancelar [48h]
+|  - Doctor aceptar:    /email/cita/{cita}/doctor/aceptar    [48h]
+|  - Doctor cancelar:   /email/cita/{cita}/doctor/cancelar   [48h]
+*/
+Route::middleware('signed')->get('/email/cita/{cita}/{rol}/{accion}', EmailCitaActionController::class)
+    ->where('rol', '^(paciente|doctor)$')
+    ->where('accion', '^(aceptar|cancelar)$')
+    ->name('email.cita.action');
+
 Route::middleware(['auth', 'role:administrador'])->prefix('admin')->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'dashboard'])->name('admin.dashboard');
     Route::get('/dashboard/resumen', [AdminDashboardController::class, 'resumenGlobal'])->name('admin.dashboard.resumen');
@@ -54,12 +70,20 @@ Route::middleware(['auth', 'role:paciente'])->prefix('paciente')->group(function
     Route::get('/dashboard', [PacienteDashboardController::class, 'dashboard'])->name('paciente.dashboard');
     Route::get('/perfil', [PacienteDashboardController::class, 'editarPerfil'])->name('paciente.perfil.edit');
     Route::post('/perfil', [PacienteDashboardController::class, 'actualizarPerfil'])->name('paciente.perfil.update');
+
     Route::get('/citas', [CitaController::class, 'index'])->name('paciente.citas');
     Route::get('/crear-cita', [CitaController::class, 'create'])->name('paciente.crear-cita');
     Route::post('/crear-cita', [CitaController::class, 'store'])->name('paciente.crear-cita.store');
+
     Route::post('/citas/{id}/cancelar', [CitaController::class, 'cancelar'])->name('paciente.citas.cancelar');
+
     Route::get('/editar-cita/{id}', [CitaController::class, 'edit'])->name('paciente.editar-cita');
-    Route::post('/editar-cita/{id}', [CitaController::class, 'actualizar'])->name('paciente.editar-cita.update');
+
+    // ⬇⬇ IMPORTANTE: la actualización AHORA acepta PUT (coincide con tu formulario @method('PUT'))
+    Route::put('/editar-cita/{id}', [CitaController::class, 'actualizar'])->name('paciente.editar-cita.update');
+    // Si quieres compatibilidad adicional, puedes usar:
+    // Route::match(['POST','PUT','PATCH'], '/editar-cita/{id}', [CitaController::class, 'actualizar'])->name('paciente.editar-cita.update');
+
     Route::view('/historial', 'paciente.historial')->name('paciente.historial');
     Route::view('/mensajes', 'paciente.mensajes')->name('paciente.mensajes');
 });
@@ -68,14 +92,30 @@ Route::middleware(['auth', 'role:doctor'])->prefix('doctor')->group(function () 
     Route::get('/dashboard', [DoctorDashboardController::class, 'dashboard'])->name('doctor.dashboard');
     Route::get('/perfil', [DoctorDashboardController::class, 'editarPerfil'])->name('doctor.perfil.edit');
     Route::post('/perfil', [DoctorDashboardController::class, 'actualizarPerfil'])->name('doctor.perfil.update');
+
     Route::get('/citas', [CitaController::class, 'indexDoctor'])->name('doctor.citas');
     Route::post('/citas/{id}/aceptar', [CitaController::class, 'aceptar'])->name('doctor.citas.aceptar');
     Route::post('/citas/{id}/rechazar', [CitaController::class, 'rechazar'])->name('doctor.citas.rechazar');
     Route::post('/citas/{id}/realizar', [CitaController::class, 'realizar'])->name('doctor.citas.realizar');
     Route::get('/dashboard/data', [DoctorDashboardController::class, 'dashboardData'])->name('doctor.dashboard.data');
+
+    // === Recetas ===
+    // Historial (NUEVO)
+    Route::get('/recetas', [RecetaController::class, 'index'])->name('doctor.recetas.index');
+
+    // Crear / Guardar
+    Route::get('/recetas/crear/{cita}', [RecetaController::class, 'create'])->name('doctor.recetas.create');
+    Route::post('/recetas', [RecetaController::class, 'store'])->name('doctor.recetas.store');
+
+    // Editar / Actualizar
+    Route::get('/recetas/editar/{cita}', [RecetaController::class, 'edit'])->name('doctor.recetas.edit');
+    Route::post('/recetas/actualizar', [RecetaController::class, 'update'])->name('doctor.recetas.update');
+
+    // Reenviar y Descargar
+    Route::post('/recetas/reenviar/{cita}', [RecetaController::class, 'resend'])->name('doctor.recetas.resend');
+    Route::get('/recetas/descargar/{cita}', [RecetaController::class, 'download'])->name('doctor.recetas.download');
 });
-
-
+// Rutas para cerrar sesión
 Route::post('/salir', function (Request $request) {
     Auth::logout();
     $request->session()->invalidate();
@@ -91,7 +131,6 @@ Route::get('/salir', function (Request $request) {
     }
     return redirect('/');
 })->name('salir.get');
-
 
 Route::get('/login', function () {
     return redirect('/?login=1');
