@@ -10,6 +10,9 @@
     --usuarios-border:#e2e8f0;
     --usuarios-muted:#64748b;
     --usuarios-dark:#0f172a;
+    --ok:#047857; --okbg:#ecfdf5; --okbd:#bbf7d0;
+    --err:#9f1239; --errbg:#fff0f2; --errbd:#fecdd3;
+    --warn:#92400e; --warnbg:#fffbeb; --warnbd:#fde68a;
   }
   body{background:var(--usuarios-bg);}
   .users-page{width:min(1240px,100%);margin:96px auto 40px;padding:0 24px 60px;display:grid;gap:28px;}
@@ -46,6 +49,9 @@
   .user-id{font-size:.82rem;color:var(--usuarios-muted);font-weight:600;}
   .chips{display:flex;flex-wrap:wrap;gap:.35rem;}
   .chip{background:var(--usuarios-primary-soft);border-radius:999px;padding:.2rem .7rem;color:var(--usuarios-primary);font-size:.78rem;font-weight:700;border:1px solid var(--usuarios-border);animation:fadeIn .6s ease both;}
+  .chip.bad{color:#b91c1c;background:rgba(239,68,68,.12);}
+  .chip.warn{color:#92400e;background:var(--warnbg);border-color:var(--warnbd);}
+  .chip.ok{color:#065f46;background:#ecfdf5;border-color:#bbf7d0;}
   .help{font-size:.82rem;color:var(--usuarios-muted);margin-top:6px;}
   .input,.select{width:100%;height:46px;border-radius:14px;border:1.5px solid var(--usuarios-border);background:#ffffff;color:var(--usuarios-dark);padding:0 1rem;font-weight:600;transition:border .15s,box-shadow .15s;}
   .input:focus,.select:focus{outline:none;border-color:var(--usuarios-primary);box-shadow:0 0 0 5px rgba(29,78,216,.16);}
@@ -55,9 +61,12 @@
   .btn-primary{background:var(--usuarios-primary);color:#fff;box-shadow:0 18px 28px rgba(29,78,216,.22);}
   .btn-outline{background:#fff;border:1.5px solid var(--usuarios-border);color:var(--usuarios-dark);transition:border .2s,color .2s,background .2s;}
   .btn-outline:hover{background:var(--usuarios-primary-soft);color:var(--usuarios-primary);border-color:var(--usuarios-primary);}
+  .btn-danger{background:#ef4444;color:#fff;}
+  .btn-warn{background:#f59e0b;color:#111827;}
+  .btn-ok{background:#10b981;color:#fff;}
   .alert{padding:1rem 1.2rem;border-radius:16px;margin:1.2rem 2rem 0;font-weight:600;border:1px solid transparent;}
-  .alert-success{background:#ecfdf5;border-color:#bbf7d0;color:#047857;}
-  .alert-error{background:#fff0f2;border-color:#fecdd3;color:#9f1239;}
+  .alert-success{background:var(--okbg);border-color:var(--okbd);color:var(--ok);}
+  .alert-error{background:var(--errbg);border-color:var(--errbd);color:var(--err);}
   .users-card__footer{display:flex;justify-content:space-between;flex-wrap:wrap;gap:1rem;align-items:center;padding:1rem 2rem 1.4rem;color:var(--usuarios-muted);font-weight:600;}
   tbody tr:hover td{background:var(--usuarios-primary-soft);}
   @media (max-width:960px){
@@ -79,7 +88,7 @@
   <section class="intro">
     <div>
       <h2>Gestión de usuarios</h2>
-      <p>Administra la información de doctores, pacientes y coordinadores desde un único lugar. Actualiza los datos y confirma con <strong>Guardar</strong>.</p>
+      <p>Administra la información y el estado de acceso: activo, suspendido, inactivo o bloqueado.</p>
     </div>
     <div class="intro-badges">
       <span class="badge"><span class="material-symbols-outlined">group</span>Total: {{ $users->total() }}</span>
@@ -98,7 +107,7 @@
     <div class="users-card__header">
       <div>
         <h3>Usuarios registrados</h3>
-        <span>Edita cualquier información y confirma para guardar los cambios.</span>
+        <span>Edita datos, rol y estado de cuenta. Confirma para guardar.</span>
       </div>
       <div class="toolbar">
         <form method="GET" action="{{ url()->current() }}" style="display:flex;gap:.75rem;flex-wrap:wrap;align-items:center;">
@@ -123,6 +132,7 @@
           <th>Usuario</th>
           <th>Contacto</th>
           <th>Rol</th>
+          <th>Estado</th>
           <th>Especialidades</th>
           <th>Acciones</th>
         </tr>
@@ -140,6 +150,10 @@
         <form id="update-{{ $u->id }}" action="{{ route('admin.usuarios.update', $u) }}" method="POST">@csrf @method('PUT')</form>
         @unless($esAdmin)
           <form id="delete-{{ $u->id }}" action="{{ route('admin.usuarios.destroy', $u) }}" method="POST">@csrf @method('DELETE')</form>
+          <form id="block-{{ $u->id }}" action="{{ route('admin.usuarios.block', $u) }}" method="POST">@csrf @method('PATCH')</form>
+          <form id="suspend-{{ $u->id }}" action="{{ route('admin.usuarios.suspend', $u) }}" method="POST">@csrf @method('PATCH')</form>
+          <form id="activate-{{ $u->id }}" action="{{ route('admin.usuarios.activate', $u) }}" method="POST">@csrf @method('PATCH')</form>
+          <form id="deactivate-{{ $u->id }}" action="{{ route('admin.usuarios.deactivate', $u) }}" method="POST">@csrf @method('PATCH')</form>
         @endunless
 
         <tr>
@@ -169,6 +183,27 @@
             @endif
           </td>
 
+          <td data-label="Estado">
+            @php
+              $estado = $u->status ?? 'active';
+              $isSusp = $u->suspended_until && now()->lt($u->suspended_until);
+            @endphp
+            <div class="chips">
+              @if($estado==='blocked')
+                <span class="chip bad" title="Sin acceso">Bloqueado</span>
+              @elseif($estado==='inactive')
+                <span class="chip warn" title="Inactivo por inactividad o manual">Inactivo</span>
+              @elseif($isSusp)
+                <span class="chip warn" title="Suspendido hasta {{ $u->suspended_until?->format('Y-m-d H:i') }}">Suspendido</span>
+              @else
+                <span class="chip ok" title="Con acceso">Activo</span>
+              @endif
+            </div>
+            @unless($esAdmin)
+              <div class="help">Último acceso: {{ $u->last_login_at?->diffForHumans() ?? '—' }}</div>
+            @endunless
+          </td>
+
           <td data-label="Especialidades">
             @if(count($espNombres))
               <div class="chips">
@@ -191,7 +226,56 @@
                         onclick="return confirm('¿Eliminar usuario {{ $u->name }}?');">
                   <span class="material-symbols-outlined">delete</span>
                 </button>
+
+                @if(($u->status ?? 'active') !== 'blocked')
+                  <button form="block-{{ $u->id }}" type="submit" class="btn btn-danger"
+                          onclick="return confirm('Bloquear a {{ $u->name }} inmediatamente?');">
+                    <span class="material-symbols-outlined">block</span>
+                  </button>
+                @endif
+
+                @if(($u->status ?? 'active') !== 'inactive')
+                  <button form="deactivate-{{ $u->id }}" type="submit" class="btn btn-outline"
+                          onclick="return confirm('Marcar inactivo a {{ $u->name }}?');">
+                    <span class="material-symbols-outlined">person_off</span>
+                  </button>
+                @endif
+
+                <button type="button" class="btn btn-warn" onclick="openSuspend('{{ $u->id }}')">
+                  <span class="material-symbols-outlined">hourglass</span>
+                </button>
+
+                @if(($u->status ?? 'active')!=='active' || ($u->suspended_until && now()->lt($u->suspended_until)))
+                  <button form="activate-{{ $u->id }}" type="submit" class="btn btn-ok"
+                          onclick="return confirm('Reactivar acceso de {{ $u->name }}?');">
+                    <span class="material-symbols-outlined">verified</span>
+                  </button>
+                @endif
               @endunless
+            </div>
+
+            <!-- Campos ocultos para block/deactivate con motivo -->
+            @unless($esAdmin)
+              <input type="hidden" form="block-{{ $u->id }}" name="reason" value="Bloqueo manual">
+              <input type="hidden" form="deactivate-{{ $u->id }}" name="reason" value="Inactivación manual">
+              <input type="hidden" form="activate-{{ $u->id }}" name="reason" value="">
+            @endunless
+          </td>
+        </tr>
+
+        <!-- Modal simple de suspensión -->
+        <tr id="susp-row-{{ $u->id }}" style="display:none;">
+          <td colspan="6" style="padding-top:0;">
+            <div style="margin:0 16px 16px;border:1px dashed var(--usuarios-border);border-radius:16px;padding:16px;background:#fff;">
+              <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
+                <div style="font-weight:700;">Suspender hasta:</div>
+                <input class="input" form="suspend-{{ $u->id }}" type="datetime-local" name="until" required>
+                <input class="input" form="suspend-{{ $u->id }}" type="text" name="reason" placeholder="Motivo (opcional)" style="flex:1;min-width:220px;">
+                <button class="btn btn-warn" form="suspend-{{ $u->id }}" type="submit">
+                  <span class="material-symbols-outlined">schedule</span> Confirmar suspensión
+                </button>
+                <button class="btn btn-outline" type="button" onclick="closeSuspend('{{ $u->id }}')">Cancelar</button>
+              </div>
             </div>
           </td>
         </tr>
@@ -211,4 +295,15 @@
     </div>
   </div>
 </div>
+
+@push('scripts')
+<script>
+  function openSuspend(id){
+    document.getElementById('susp-row-'+id).style.display='table-row';
+  }
+  function closeSuspend(id){
+    document.getElementById('susp-row-'+id).style.display='none';
+  }
+</script>
+@endpush
 @endsection

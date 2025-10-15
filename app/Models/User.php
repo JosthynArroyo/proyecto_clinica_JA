@@ -14,16 +14,21 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'active',
+        'active',              // legado, no usado para control de acceso
         'telefono',
         'dni',
         'direccion',
         'fecha_nacimiento',
         'sexo',
         'avatar',
-        // Campos de tarifa del doctor
         'precio_consulta',
         'moneda',
+        // NUEVOS
+        'status',
+        'last_login_at',
+        'last_activity_at',
+        'suspended_until',
+        'deactivation_reason',
     ];
 
     protected $hidden = [
@@ -32,10 +37,13 @@ class User extends Authenticatable
     ];
 
     protected $casts = [
-        'email_verified_at' => 'datetime',
-        'password'          => 'hashed',
-        'fecha_nacimiento'  => 'date',
-        'precio_consulta'   => 'decimal:2',
+        'email_verified_at'  => 'datetime',
+        'password'           => 'hashed',
+        'fecha_nacimiento'   => 'date',
+        'precio_consulta'    => 'decimal:2',
+        'last_login_at'      => 'datetime',
+        'last_activity_at'   => 'datetime',
+        'suspended_until'    => 'datetime',
     ];
 
     /** Roles */
@@ -66,5 +74,19 @@ class User extends Authenticatable
     public function facturasComoDoctor()
     {
         return $this->hasMany(Factura::class, 'doctor_id');
+    }
+
+    /** ===== Helpers de estado ===== */
+    public function isBlocked(): bool   { return $this->status === 'blocked'; }
+    public function isInactive(): bool  { return $this->status === 'inactive'; }
+    public function isSuspended(): bool { return $this->suspended_until && now()->lt($this->suspended_until); }
+    public function isActive(): bool    { return $this->status === 'active' && !$this->isSuspended(); }
+
+    public function scopeOnlyActive($q)
+    {
+        return $q->where('status','active')
+            ->where(function($qq){
+                $qq->whereNull('suspended_until')->orWhere('suspended_until','<=', now());
+            });
     }
 }

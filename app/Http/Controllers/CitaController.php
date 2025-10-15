@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Cita;
 use App\Models\User;
 use App\Models\Especialidad;
+use App\Models\Horario;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\QueryException;
@@ -120,7 +121,7 @@ class CitaController extends Controller
             ]
         );
 
-        $fechaHora = Carbon::createFromFormat('Y-m-d H:i', $request->fecha . ' ' . $request->hora, 'America/Guayaquil');
+        $fechaHora = Carbon::createFromFormat('Y-m-d H:i', $request->fecha.' '.$request->hora, 'America/Guayaquil');
         $ahora = now('America/Guayaquil');
         if ($fechaHora->lessThanOrEqualTo($ahora)) {
             return back()->withErrors(['error' => 'La fecha y hora debe ser posterior al momento actual.'])->withInput();
@@ -131,14 +132,23 @@ class CitaController extends Controller
             return back()->withErrors(['hora' => 'La hora debe estar en intervalos de 30 minutos (por ejemplo 08:00, 08:30, 09:00).'])->withInput();
         }
 
+        $hayHorario = Horario::where('doctor_id', $request->doctor_id)
+            ->where('fecha', $request->fecha)
+            ->where('hora_inicio', '<=', $slot->format('H:i:00'))
+            ->where('hora_fin', '>', $slot->format('H:i:00'))
+            ->exists();
+
+        if (!$hayHorario) {
+            return back()->withErrors(['error' => 'No hay horario disponible del doctor para ese día y hora.'])->withInput();
+        }
+
         $citasMismoDia = Cita::where('doctor_id', $request->doctor_id)
             ->where('fecha', $request->fecha)
             ->where('activo', true)
             ->get(['id', 'hora']);
 
         $existe = $citasMismoDia->contains(function ($c) use ($slot) {
-            $h = $c->hora;
-            if (strlen($h) >= 5) $h = substr($h, 0, 5);
+            $h = strlen($c->hora) >= 5 ? substr($c->hora, 0, 5) : $c->hora;
             $otro = Carbon::createFromFormat('H:i', $h);
             return $otro->diffInMinutes($slot) <= 29;
         });
@@ -186,7 +196,7 @@ class CitaController extends Controller
 
         $cita->estado = Cita::ESTADO_CANCELADA;
         $cita->activo = false;
-               $cita->save();
+        $cita->save();
 
         NotificarCambioEstadoCitaJob::dispatch($cita, 'cancelada', 'paciente');
 
@@ -229,7 +239,7 @@ class CitaController extends Controller
             ]
         );
 
-        $fechaHora = Carbon::createFromFormat('Y-m-d H:i', $request->fecha . ' ' . $request->hora, 'America/Guayaquil');
+        $fechaHora = Carbon::createFromFormat('Y-m-d H:i', $request->fecha.' '.$request->hora, 'America/Guayaquil');
         $ahora = now('America/Guayaquil');
         if ($fechaHora->lessThanOrEqualTo($ahora)) {
             return back()->withErrors(['error' => 'La fecha y hora debe ser posterior al momento actual.'])->withInput();
@@ -240,6 +250,16 @@ class CitaController extends Controller
             return back()->withErrors(['hora' => 'La hora debe estar en intervalos de 30 minutos (por ejemplo 08:00, 08:30, 09:00).'])->withInput();
         }
 
+        $hayHorario = Horario::where('doctor_id', $cita->doctor_id)
+            ->where('fecha', $request->fecha)
+            ->where('hora_inicio', '<=', $slot->format('H:i:00'))
+            ->where('hora_fin', '>', $slot->format('H:i:00'))
+            ->exists();
+
+        if (!$hayHorario) {
+            return back()->withErrors(['error' => 'No hay horario disponible del doctor para ese día y hora.'])->withInput();
+        }
+
         $citasMismoDia = Cita::where('doctor_id', $cita->doctor_id)
             ->where('fecha', $request->fecha)
             ->where('activo', true)
@@ -247,8 +267,7 @@ class CitaController extends Controller
             ->get(['id', 'hora']);
 
         $existe = $citasMismoDia->contains(function ($c) use ($slot) {
-            $h = $c->hora;
-            if (strlen($h) >= 5) $h = substr($h, 0, 5);
+            $h = strlen($c->hora) >= 5 ? substr($c->hora, 0, 5) : $c->hora;
             $otro = Carbon::createFromFormat('H:i', $h);
             return $otro->diffInMinutes($slot) <= 29;
         });
@@ -359,5 +378,57 @@ class CitaController extends Controller
         $pacientes = $citas->pluck('paciente.name');
 
         return response()->json($pacientes);
+    }
+
+    /**
+     * API: slots disponibles de 30 min para un doctor y fecha.
+     * GET /api/doctor/{doctor}/fecha/{fecha}/slots
+     */
+    public function slotsDisponibles($doctor, $fecha)
+    {
+        $horarios = Horario::where('doctor_id', $doctor)
+            ->where('fecha', $fecha)
+            ->orderBy('hora_inicio')
+            ->get(['hora_inicio','hora_fin']);
+
+        if ($horarios->isEmpty()) {
+            return response()->json(['slots' => []]);
+        }
+
+        $ocupadas = Cita::where('doctor_id', $doctor)
+            ->where('fecha', $fecha)
+            ->where('activo', true)
+            ->pluck('hora')                           // HH:MM:SS
+            ->map(fn($h) => substr($h, 0, 5))        // HH:MM
+            ->toArray();
+
+        $slots = [];
+        $ahora = now('America/Guayaquil');
+        $esHoy = $fecha === $ahora->format('Y-m-d');
+        $limiteHoy = Carbon::createFromFormat('H:i', $ahora->format('H:i'));
+
+        foreach ($horarios as $h) {
+            $ini = Carbon::createFromFormat('H:i:s', $h->hora_inicio);
+            $fin = Carbon::createFromFormat('H:i:s', $h->hora_fin);
+
+            for ($t = $ini->copy(); $t->lt($fin); $t->addMinutes(30)) {
+                if ($esHoy && $t->lte($limiteHoy)) continue;
+
+                $hhmm = $t->format('H:i');
+
+                // bloquea choques +/- 30 min contra citas ocupadas
+                $choca = collect($ocupadas)->contains(function ($o) use ($hhmm) {
+                    $a = Carbon::createFromFormat('H:i', $o);
+                    $b = Carbon::createFromFormat('H:i', $hhmm);
+                    return $a->diffInMinutes($b) <= 29;
+                });
+                if ($choca) continue;
+
+                $slots[] = $hhmm;
+            }
+        }
+
+        $slots = collect($slots)->unique()->sort()->values()->all();
+        return response()->json(['slots' => $slots]);
     }
 }

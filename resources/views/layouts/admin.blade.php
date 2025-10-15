@@ -50,6 +50,12 @@
         <span class="material-symbols-outlined">group_add</span><h3>Registrar Paciente</h3>
       </a>
 
+      {{-- NUEVO: Horarios --}}
+      <a href="{{ route('admin.horarios.index') }}"
+         class="{{ request()->routeIs('admin.horarios.*') ? 'active' : '' }}">
+        <span class="material-symbols-outlined">schedule</span><h3>Horarios</h3>
+      </a>
+
       <a href="{{ route('admin.perfil.edit') }}"
          class="{{ request()->routeIs('admin.perfil.*') ? 'active' : '' }}">
         <span class="material-symbols-outlined">account_circle</span><h3>Perfil</h3>

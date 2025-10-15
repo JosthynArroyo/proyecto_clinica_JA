@@ -177,10 +177,20 @@
                     @if(session('status'))
                         <div class="alert ok">{{ session('status') }}</div>
                     @endif
-                    @if($errors->any())
+
+                    {{-- Abre modal si hay error de auth o validación --}}
+                    @if(session('auth_error') || $errors->any())
                         <span data-open-login-onload hidden></span>
+                    @endif
+
+                    @if(session('auth_error'))
+                        <div class="alert err">{{ session('auth_error') }}</div>
+                    @elseif($errors->has('email'))
+                        <div class="alert err">{{ $errors->first('email') }}</div>
+                    @elseif($errors->any())
                         <div class="alert err">Revisa tus datos e inténtalo nuevamente.</div>
                     @endif
+
                     <form method="POST" action="{{ route('login') }}" id="loginForm">
                         @csrf
                         <div class="field">
@@ -202,6 +212,7 @@
                         <button type="submit" class="submit">Entrar</button>
                     </form>
                 </div>
+
             </div>
         </div>
     </div>

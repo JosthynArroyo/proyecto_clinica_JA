@@ -132,14 +132,14 @@ class RecetaController extends Controller
 
         $receta = $cita->receta;
 
-        // 1) Guardar SIEMPRE primero
+        // Guardar primero
         $receta->update([
             'diagnostico'  => $data['diagnostico'],
             'medicamentos' => $data['medicamentos'],
             'indicaciones' => $data['indicaciones'] ?? null,
         ]);
 
-        // 2) ¿Hace falta regenerar PDF?
+        // ¿Regenerar PDF?
         $needRegen = $request->boolean('regenerar_pdf')
             || $request->boolean('reenviar')
             || empty($receta->pdf_path)
@@ -156,7 +156,7 @@ class RecetaController extends Controller
             $receta->update(['pdf_path' => $relativePath]);
         }
 
-        // 3) ¿Reenviar?
+        // ¿Reenviar?
         if ($request->boolean('reenviar')) {
             if (!$pdfOutput && $relativePath && Storage::exists($relativePath)) {
                 $pdfOutput = Storage::get($relativePath);
@@ -171,7 +171,6 @@ class RecetaController extends Controller
                 ->with('success', 'Receta actualizada y reenviada al paciente.');
         }
 
-        // 4) Solo guardado
         return redirect()->route('doctor.recetas.edit', $cita->id)
             ->with(['success' => 'Receta actualizada correctamente.', 'ask_resend' => true]);
     }
@@ -189,7 +188,7 @@ class RecetaController extends Controller
 
         $receta = $cita->receta;
 
-        // Regenerar SIEMPRE para garantizar la última versión
+        // Regenerar siempre para garantizar la última versión
         [$relativePath, $pdfOutput, $fileName] = $this->generarPdfYGuardar(
             $cita, $receta->diagnostico, $receta->medicamentos, $receta->indicaciones ?? ''
         );
@@ -230,6 +229,9 @@ class RecetaController extends Controller
         return Storage::download($path, $downloadName);
     }
 
+    /**
+     * Genera el PDF y lo guarda. Embebe el logo para evitar “type unknown”.
+     */
     private function generarPdfYGuardar(Cita $cita, string $diagnostico, string $medicamentos, string $indicaciones = ''): array
     {
         $viewData = [
@@ -238,7 +240,9 @@ class RecetaController extends Controller
             'medicamentos' => $medicamentos,
             'indicaciones' => $indicaciones,
             'fechaPdf'     => now('America/Guayaquil'),
+            'logoBase64'   => $this->logoBase64(), // <- se pasa a la vista
         ];
+
         $html = view('pdf.receta', $viewData)->render();
 
         $options = new Options();
@@ -261,5 +265,19 @@ class RecetaController extends Controller
         Storage::put($relativePath, $pdfOutput);
 
         return [$relativePath, $pdfOutput, $fileName];
+    }
+
+    /**
+     * Devuelve el logo /public/img/logo_clinica.png en data-URI base64.
+     */
+    private function logoBase64(): ?string
+    {
+        $path = public_path('img/logo_clinica.png');
+        if (!is_file($path)) return null;
+
+        // Ajusta MIME si tu archivo es jpg/webp.
+        $mime = 'image/png';
+        $data = base64_encode(file_get_contents($path));
+        return "data:{$mime};base64,{$data}";
     }
 }

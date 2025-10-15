@@ -18,7 +18,7 @@ class LoginController extends Controller
         $this->middleware('auth')->only('logout');
     }
 
-    // >>> Evitar ver la pantalla /login y usar el modal del home
+    // Evitar ver la pantalla /login y usar el modal del home
     protected function showLoginForm()
     {
         return redirect('/?login=1');
@@ -45,26 +45,33 @@ class LoginController extends Controller
 
     protected function authenticated(Request $request, $user)
     {
-        if ($user->hasRole('administrador')) {
-            return redirect()->intended('admin/dashboard');
-        } elseif ($user->hasRole('paciente')) {
-            return redirect()->intended('paciente/dashboard');
-        } elseif ($user->hasRole('doctor')) {
-            return redirect()->intended('doctor/dashboard');
+        if (!$user->isActive()) {
+            \Auth::logout();
+            return redirect()->route('login')
+                ->withErrors(['email' => 'Tu cuenta está deshabilitada o suspendida.'])
+                ->with('auth_error', 'Tu cuenta está deshabilitada o suspendida.');
         }
 
+        if ($user->hasRole('administrador')) return redirect()->intended('admin/dashboard');
+        if ($user->hasRole('paciente'))      return redirect()->intended('paciente/dashboard');
+        if ($user->hasRole('doctor'))        return redirect()->intended('doctor/dashboard');
         return redirect('/');
     }
+
 
     protected function redirectTo()
     {
         $user = Auth::user();
 
-        if ($user->hasRole('administrador')) {
+        if ($user && !$user->isActive()) {
+            return route('login');
+        }
+
+        if ($user && $user->hasRole('administrador')) {
             return 'admin/dashboard';
-        } elseif ($user->hasRole('paciente')) {
+        } elseif ($user && $user->hasRole('paciente')) {
             return 'paciente/dashboard';
-        } elseif ($user->hasRole('doctor')) {
+        } elseif ($user && $user->hasRole('doctor')) {
             return 'doctor/dashboard';
         }
 

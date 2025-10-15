@@ -1,24 +1,21 @@
-<!doctype html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+{{-- resources/views/layouts/app.blade.php --}}
+<!DOCTYPE html>
+<html lang="es">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- CSRF Token -->
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ config('app.name', 'Clínica Los Ángeles') }}</title>
-    <!-- Fonts -->
-    <link rel="dns-prefetch" href="//fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=Nunito" rel="stylesheet">
-    <!-- Scripts -->
-    @vite(['resources/sass/app.scss', 'resources/js/app.js'])
-    @stack('head')
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>@yield('title','Clínica')</title>
+
+  {{-- si usas Vite/Bootstrap, déjalo aquí --}}
+  @vite(['resources/css/app.css','resources/js/app.js'])
+
+  {{-- NECESARIO para que entren los estilos de las vistas --}}
+  @stack('styles')
 </head>
 <body>
-    {{-- Sección para header o acciones adicionales --}}
-    @yield('header-actions')
-    <main>
-        @yield('content')
-    </main>
-    @stack('scripts')
+  @yield('content')
+
+  {{-- NECESARIO para los scripts que se pushean desde las vistas --}}
+  @stack('scripts')
 </body>
 </html>

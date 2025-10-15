@@ -42,10 +42,12 @@
     if (ev.key === 'Escape' && modal.classList.contains('is-open')) closeModal(ev);
   });
 
+  // Abre si el servidor dejó la marca por errores de validación
   if (modal.querySelector('[data-open-login-onload]')) {
     openModal();
   }
 
+  // Abre si viene ?login=1 en la URL (enlaces "Iniciar Sesión" o "Agendar Cita")
   const params = new URLSearchParams(window.location.search);
   if (params.get('login') === '1') {
     openModal();
@@ -54,5 +56,6 @@
     window.history.replaceState({}, '', cleanUrl);
   }
 
+  // Soporte para abrir desde otros scripts
   window.addEventListener('open-login-modal', openModal);
 })();
