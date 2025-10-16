@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>@yield('title','Panel Administrativo - Clínica Los Ángeles')</title>
-
+  <link rel="icon" type="image/jpg" href="{{ asset('img/LogoClinica.jpg') }}">
   {{-- Iconos --}}
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Sharp" rel="stylesheet" />

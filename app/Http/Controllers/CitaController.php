@@ -18,6 +18,16 @@ use Carbon\Carbon;
 
 class CitaController extends Controller
 {
+    /** ======================= UTIL ======================= */
+    /** Normaliza una hora DB que puede venir como H:i o H:i:s */
+    protected function parseHoraFlexible(string $h): Carbon
+    {
+        return strlen($h) >= 8
+            ? Carbon::createFromFormat('H:i:s', $h)
+            : Carbon::createFromFormat('H:i', $h);
+    }
+
+    /** ======================= PACIENTE: LISTADO ======================= */
     public function index(Request $request)
     {
         $userId = Auth::id();
@@ -42,7 +52,7 @@ class CitaController extends Controller
                     });
                 });
             })
-            ->when(in_array($estado, $validStates, true), function ($query) use ($estado) {
+            ->when(in_array($estado, ['pendiente','confirmada','cancelada','realizada'], true), function ($query) use ($estado) {
                 $query->where('estado', $estado);
             })
             ->orderBy('fecha', 'desc')
@@ -54,9 +64,8 @@ class CitaController extends Controller
 
         if ($citas->count() === 0) {
             if ($q !== '' && in_array($estado, $validStates, true)) {
-                $doctorExists = User::whereHas('roles', function ($r) { $r->where('name', 'doctor'); })
-                    ->whereRaw('LOWER(name) LIKE ?', ['%'.$qNorm.'%'])
-                    ->exists();
+                $doctorExists = User::whereHas('roles', fn($r) => $r->where('name','doctor'))
+                    ->whereRaw('LOWER(name) LIKE ?', ['%'.$qNorm.'%'])->exists();
                 $especialidadExists = Especialidad::whereRaw('LOWER(nombre) LIKE ?', ['%'.$qNorm.'%'])->exists();
 
                 if ($especialidadExists && !$doctorExists) {
@@ -69,9 +78,8 @@ class CitaController extends Controller
                     $emptyMessage = 'No hay coincidencias para "'.$q.'" en estado '.ucfirst($estado).'.';
                 }
             } elseif ($q !== '') {
-                $doctorExists = User::whereHas('roles', function ($r) { $r->where('name', 'doctor'); })
-                    ->whereRaw('LOWER(name) LIKE ?', ['%'.$qNorm.'%'])
-                    ->exists();
+                $doctorExists = User::whereHas('roles', fn($r) => $r->where('name','doctor'))
+                    ->whereRaw('LOWER(name) LIKE ?', ['%'.$qNorm.'%'])->exists();
                 $especialidadExists = Especialidad::whereRaw('LOWER(nombre) LIKE ?', ['%'.$qNorm.'%'])->exists();
 
                 if ($especialidadExists && !$doctorExists) {
@@ -93,9 +101,10 @@ class CitaController extends Controller
         return view('paciente.citas', compact('citas', 'emptyMessage', 'totalesPorEstado'));
     }
 
+    /** ======================= PACIENTE: CREAR ======================= */
     public function create()
     {
-        $doctores = User::whereHas('roles', function ($q) { $q->where('name', 'doctor'); })->get();
+        $doctores = User::whereHas('roles', fn($q) => $q->where('name','doctor'))->get();
         $especialidades = Especialidad::all();
         return view('paciente.crear-cita', compact('doctores', 'especialidades'));
     }
@@ -104,20 +113,20 @@ class CitaController extends Controller
     {
         $request->validate(
             [
-                'doctor_id' => 'required|exists:users,id',
-                'especialidad_id' => 'required|exists:especialidades,id',
-                'fecha' => 'required|date',
-                'hora' => 'required|date_format:H:i',
+                'doctor_id'        => 'required|exists:users,id',
+                'especialidad_id'  => 'required|exists:especialidades,id',
+                'fecha'            => 'required|date',
+                'hora'             => 'required|date_format:H:i',
             ],
             [
-                'doctor_id.required' => 'Seleccione un doctor.',
-                'doctor_id.exists' => 'El doctor seleccionado no existe.',
+                'doctor_id.required'       => 'Seleccione un doctor.',
+                'doctor_id.exists'         => 'El doctor seleccionado no existe.',
                 'especialidad_id.required' => 'Seleccione una especialidad.',
-                'especialidad_id.exists' => 'La especialidad seleccionada no existe.',
-                'fecha.required' => 'Seleccione una fecha.',
-                'fecha.date' => 'La fecha no es válida.',
-                'hora.required' => 'Ingrese una hora.',
-                'hora.date_format' => 'Formato de hora inválido. Use HH:MM.',
+                'especialidad_id.exists'   => 'La especialidad seleccionada no existe.',
+                'fecha.required'           => 'Seleccione una fecha.',
+                'fecha.date'               => 'La fecha no es válida.',
+                'hora.required'            => 'Ingrese una hora.',
+                'hora.date_format'         => 'Formato de hora inválido. Use HH:MM.',
             ]
         );
 
@@ -132,20 +141,22 @@ class CitaController extends Controller
             return back()->withErrors(['hora' => 'La hora debe estar en intervalos de 30 minutos (por ejemplo 08:00, 08:30, 09:00).'])->withInput();
         }
 
+        // DISPONIBILIDAD: fecha + rango [inicio, fin) usando TIME
         $hayHorario = Horario::where('doctor_id', $request->doctor_id)
-            ->where('fecha', $request->fecha)
-            ->where('hora_inicio', '<=', $slot->format('H:i:00'))
-            ->where('hora_fin', '>', $slot->format('H:i:00'))
+            ->whereDate('fecha', $request->fecha)
+            ->whereTime('hora_inicio', '<=', $slot->format('H:i:s'))
+            ->whereTime('hora_fin',   '>',  $slot->format('H:i:s'))   // fin exclusivo
             ->exists();
 
         if (!$hayHorario) {
             return back()->withErrors(['error' => 'No hay horario disponible del doctor para ese día y hora.'])->withInput();
         }
 
+        // Choque de citas +/- 30 min
         $citasMismoDia = Cita::where('doctor_id', $request->doctor_id)
-            ->where('fecha', $request->fecha)
+            ->whereDate('fecha', $request->fecha)
             ->where('activo', true)
-            ->get(['id', 'hora']);
+            ->get(['id','hora']);
 
         $existe = $citasMismoDia->contains(function ($c) use ($slot) {
             $h = strlen($c->hora) >= 5 ? substr($c->hora, 0, 5) : $c->hora;
@@ -161,13 +172,13 @@ class CitaController extends Controller
             DB::beginTransaction();
 
             $cita = Cita::create([
-                'paciente_id'      => Auth::id(),
-                'doctor_id'        => $request->doctor_id,
-                'especialidad_id'  => $request->especialidad_id,
-                'fecha'            => $request->fecha,
-                'hora'             => $slot->format('H:i:00'),
-                'estado'           => Cita::ESTADO_PENDIENTE,
-                'activo'           => true,
+                'paciente_id'     => Auth::id(),
+                'doctor_id'       => $request->doctor_id,
+                'especialidad_id' => $request->especialidad_id,
+                'fecha'           => $request->fecha,
+                'hora'            => $slot->format('H:i:00'),
+                'estado'          => Cita::ESTADO_PENDIENTE,
+                'activo'          => true,
             ]);
 
             DB::commit();
@@ -203,6 +214,7 @@ class CitaController extends Controller
         return back()->with('success', 'Cita cancelada.');
     }
 
+    /** ======================= PACIENTE: EDITAR/ACTUALIZAR ======================= */
     public function edit($id)
     {
         $cita = Cita::with(['doctor','especialidad'])->findOrFail($id);
@@ -250,21 +262,23 @@ class CitaController extends Controller
             return back()->withErrors(['hora' => 'La hora debe estar en intervalos de 30 minutos (por ejemplo 08:00, 08:30, 09:00).'])->withInput();
         }
 
+        // DISPONIBILIDAD coherente con store(): fecha + rango [inicio, fin)
         $hayHorario = Horario::where('doctor_id', $cita->doctor_id)
-            ->where('fecha', $request->fecha)
-            ->where('hora_inicio', '<=', $slot->format('H:i:00'))
-            ->where('hora_fin', '>', $slot->format('H:i:00'))
+            ->whereDate('fecha', $request->fecha)
+            ->whereTime('hora_inicio', '<=', $slot->format('H:i:s'))
+            ->whereTime('hora_fin',   '>',  $slot->format('H:i:s'))   // fin exclusivo
             ->exists();
 
         if (!$hayHorario) {
             return back()->withErrors(['error' => 'No hay horario disponible del doctor para ese día y hora.'])->withInput();
         }
 
+        // Choque con otras citas del mismo día (+/- 30 min), excluyendo esta
         $citasMismoDia = Cita::where('doctor_id', $cita->doctor_id)
-            ->where('fecha', $request->fecha)
+            ->whereDate('fecha', $request->fecha)
             ->where('activo', true)
             ->where('id', '!=', $cita->id)
-            ->get(['id', 'hora']);
+            ->get(['id','hora']);
 
         $existe = $citasMismoDia->contains(function ($c) use ($slot) {
             $h = strlen($c->hora) >= 5 ? substr($c->hora, 0, 5) : $c->hora;
@@ -297,6 +311,7 @@ class CitaController extends Controller
         return redirect()->route('paciente.citas')->with('success', 'Cita reagendada.');
     }
 
+    /** ======================= DOCTOR: LISTADO ======================= */
     public function indexDoctor()
     {
         $citas = Cita::where('doctor_id', Auth::id())
@@ -387,7 +402,7 @@ class CitaController extends Controller
     public function slotsDisponibles($doctor, $fecha)
     {
         $horarios = Horario::where('doctor_id', $doctor)
-            ->where('fecha', $fecha)
+            ->whereDate('fecha', $fecha)
             ->orderBy('hora_inicio')
             ->get(['hora_inicio','hora_fin']);
 
@@ -396,10 +411,10 @@ class CitaController extends Controller
         }
 
         $ocupadas = Cita::where('doctor_id', $doctor)
-            ->where('fecha', $fecha)
+            ->whereDate('fecha', $fecha)
             ->where('activo', true)
-            ->pluck('hora')                           // HH:MM:SS
-            ->map(fn($h) => substr($h, 0, 5))        // HH:MM
+            ->pluck('hora')                     // HH:MM:SS
+            ->map(fn($h) => substr($h, 0, 5))   // HH:MM
             ->toArray();
 
         $slots = [];
@@ -408,9 +423,10 @@ class CitaController extends Controller
         $limiteHoy = Carbon::createFromFormat('H:i', $ahora->format('H:i'));
 
         foreach ($horarios as $h) {
-            $ini = Carbon::createFromFormat('H:i:s', $h->hora_inicio);
-            $fin = Carbon::createFromFormat('H:i:s', $h->hora_fin);
+            $ini = $this->parseHoraFlexible($h->hora_inicio);
+            $fin = $this->parseHoraFlexible($h->hora_fin);
 
+            // fin exclusivo
             for ($t = $ini->copy(); $t->lt($fin); $t->addMinutes(30)) {
                 if ($esHoy && $t->lte($limiteHoy)) continue;
 

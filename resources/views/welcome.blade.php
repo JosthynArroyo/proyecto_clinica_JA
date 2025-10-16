@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Clínica Los Ángeles</title>
+    <link rel="icon" type="image/jpg" href="{{ asset('img/LogoClinica.jpg') }}">
     @vite(['resources/css/welcome.css','resources/js/welcome-login-modal.js'])
 </head>
 <body>

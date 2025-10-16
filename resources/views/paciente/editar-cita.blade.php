@@ -1,3 +1,4 @@
+{{-- resources/views/paciente/editar-cita.blade.php --}}
 @extends('layouts.paciente')
 @section('title', 'Reagendar Cita')
 @section('body-class', 'paciente-body--editar-cita')
@@ -11,16 +12,19 @@
         <div class="card">
             <div class="card-header">
                 <div class="header-panel">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                        <rect x="3" y="4" width="18" height="18" rx="3"></rect>
-                        <path d="M16 2v4M8 2v4M3 10h18"></path>
-                    </svg>
+                    {{-- Botón regresar como flecha --}}
+                    <a href="{{ route('paciente.citas') }}" class="back-btn" aria-label="Regresar">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </a>
                     <div>
                         <h1 class="title">Reagendar Cita</h1>
                         <p class="subtitle">Selecciona una nueva fecha y hora para tu atención.</p>
                     </div>
                 </div>
             </div>
+
             <div class="card-body">
                 @if ($errors->has('error'))
                     <div class="alert">{{ $errors->first('error') }}</div>
@@ -96,11 +100,9 @@
                     </div>
 
                     <div class="actions">
-                        <a class="btn btn-ghost" href="{{ route('paciente.citas') }}">Regresar</a>
                         <button type="submit" class="btn btn-primary">Guardar cambios</button>
                     </div>
                 </form>
-
             </div>
         </div>
     </div>

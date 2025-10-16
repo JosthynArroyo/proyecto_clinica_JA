@@ -1,3 +1,4 @@
+{{-- resources/views/paciente/citas/index.blade.php --}}
 @extends('layouts.paciente')
 @section('title', 'Mis Citas Médicas')
 @section('body-class', 'paciente-body--citas')
@@ -55,10 +56,10 @@
   @if(session('success') || session('error'))
     <div aria-live="polite" aria-atomic="true">
       @if(session('success'))
-        <div class="empty" role="status" style="border-color:#bfead2;background:#e6f7ee;color:#146c43">{{ session('success') }}</div>
+        <div class="empty" role="status" style="border-color:#cfe9dc;background:#edf7f1;color:#0f5132">{{ session('success') }}</div>
       @endif
       @if(session('error'))
-        <div class="empty" role="alert" style="border-color:#ffc9c9;background:#ffeaea;color:#b42323">{{ session('error') }}</div>
+        <div class="empty" role="alert" style="border-color:#f2c0c0;background:#fff1f1;color:#842029">{{ session('error') }}</div>
       @endif
     </div>
   @endif
@@ -100,9 +101,9 @@
           <div class="right">
             @switch($cita->estado)
               @case('pendiente')  <span class="pill pending">PENDIENTE</span>  @break
-              @case('confirmada') <span class="pill success">CONFIRMADA</span>   @break
+              @case('confirmada') <span class="pill success">CONFIRMADA</span> @break
               @case('cancelada')  <span class="pill danger">CANCELADA</span>   @break
-              @case('realizada')  <span class="pill info">REALIZADA</span>  @break
+              @case('realizada')  <span class="pill info">REALIZADA</span>     @break
               @default            <span class="pill info">{{ strtoupper($cita->estado) }}</span>
             @endswitch
 
