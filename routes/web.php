@@ -1,4 +1,5 @@
 <?php
+// routes/web.php
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
@@ -69,10 +70,18 @@ Route::middleware(['auth', 'role:administrador'])->prefix('admin')->group(functi
     Route::get('/perfil', [AdminDashboardController::class, 'editarPerfil'])->name('admin.perfil.edit');
     Route::post('/perfil', [AdminDashboardController::class, 'actualizarPerfil'])->name('admin.perfil.update');
     
-    // Usuarios
+    // Usuarios (módulo completo)
     Route::get('/usuarios', [AdminDashboardController::class, 'usuarios'])->name('admin.usuarios.index');
+    Route::get('/usuarios/crear', [AdminDashboardController::class, 'usuariosCreate'])->name('admin.usuarios.create');
+    Route::post('/usuarios', [AdminDashboardController::class, 'usuariosStore'])->name('admin.usuarios.store');
+    Route::get('/usuarios/{user}', [AdminDashboardController::class, 'usuariosShow'])->name('admin.usuarios.show');
+    Route::get('/usuarios/{user}/editar', [AdminDashboardController::class, 'usuariosEdit'])->name('admin.usuarios.edit');
     Route::put('/usuarios/{user}', [AdminDashboardController::class, 'usuariosUpdate'])->name('admin.usuarios.update');
     Route::delete('/usuarios/{user}', [AdminDashboardController::class, 'usuariosDestroy'])->name('admin.usuarios.destroy');
+
+    // Exportes
+    Route::get('/usuarios/export/excel', [AdminDashboardController::class, 'usuariosExportExcel'])->name('admin.usuarios.export.excel');
+    Route::get('/usuarios/export/pdf',   [AdminDashboardController::class, 'usuariosExportPdf'])->name('admin.usuarios.export.pdf');
 
     // === Acciones de estado de cuenta ===
     Route::patch('/usuarios/{user}/block', function(User $user){
@@ -123,9 +132,7 @@ Route::middleware(['auth', 'role:administrador'])->prefix('admin')->group(functi
     // Exportar citas
     Route::get('/citas/export', [ExportCitasController::class, 'exportarCitas'])->name('admin.citas.export');
 
-    // ============================================================
-    // HORARIOS (CRUD completo)
-    // ============================================================
+    // HORARIOS
     Route::get('/horarios', [HorarioController::class, 'index'])->name('admin.horarios.index');
     Route::get('/horarios/crear', [HorarioController::class, 'create'])->name('admin.horarios.create');
     Route::post('/horarios', [HorarioController::class, 'store'])->name('admin.horarios.store');
@@ -138,22 +145,15 @@ Route::middleware(['auth', 'role:administrador'])->prefix('admin')->group(functi
 // PACIENTE
 // ============================================================
 Route::middleware(['auth', 'role:paciente'])->prefix('paciente')->group(function () {
-    // Dashboard
     Route::get('/dashboard', [PacienteDashboardController::class, 'dashboard'])->name('paciente.dashboard');
-    
-    // Perfil
     Route::get('/perfil', [PacienteDashboardController::class, 'editarPerfil'])->name('paciente.perfil.edit');
     Route::post('/perfil', [PacienteDashboardController::class, 'actualizarPerfil'])->name('paciente.perfil.update');
-
-    // Citas
     Route::get('/citas', [CitaController::class, 'index'])->name('paciente.citas');
     Route::get('/crear-cita', [CitaController::class, 'create'])->name('paciente.crear-cita');
     Route::post('/crear-cita', [CitaController::class, 'store'])->name('paciente.crear-cita.store');
     Route::post('/citas/{id}/cancelar', [CitaController::class, 'cancelar'])->name('paciente.citas.cancelar');
     Route::get('/editar-cita/{id}', [CitaController::class, 'edit'])->name('paciente.editar-cita');
     Route::put('/editar-cita/{id}', [CitaController::class, 'actualizar'])->name('paciente.editar-cita.update');
-
-    // Historial y mensajes
     Route::view('/historial', 'paciente.historial')->name('paciente.historial');
     Route::view('/mensajes', 'paciente.mensajes')->name('paciente.mensajes');
 });
@@ -162,21 +162,14 @@ Route::middleware(['auth', 'role:paciente'])->prefix('paciente')->group(function
 // DOCTOR
 // ============================================================
 Route::middleware(['auth', 'role:doctor'])->prefix('doctor')->group(function () {
-    // Dashboard
     Route::get('/dashboard', [DoctorDashboardController::class, 'dashboard'])->name('doctor.dashboard');
     Route::get('/dashboard/data', [DoctorDashboardController::class, 'dashboardData'])->name('doctor.dashboard.data');
-    
-    // Perfil
     Route::get('/perfil', [DoctorDashboardController::class, 'editarPerfil'])->name('doctor.perfil.edit');
     Route::post('/perfil', [DoctorDashboardController::class, 'actualizarPerfil'])->name('doctor.perfil.update');
-
-    // Citas
     Route::get('/citas', [CitaController::class, 'indexDoctor'])->name('doctor.citas');
     Route::post('/citas/{id}/aceptar', [CitaController::class, 'aceptar'])->name('doctor.citas.aceptar');
     Route::post('/citas/{id}/rechazar', [CitaController::class, 'rechazar'])->name('doctor.citas.rechazar');
     Route::post('/citas/{id}/realizar', [CitaController::class, 'realizar'])->name('doctor.citas.realizar');
-
-    // Recetas
     Route::get('/recetas', [RecetaController::class, 'index'])->name('doctor.recetas.index');
     Route::get('/recetas/crear/{cita}', [RecetaController::class, 'create'])->name('doctor.recetas.create');
     Route::post('/recetas', [RecetaController::class, 'store'])->name('doctor.recetas.store');
@@ -209,7 +202,6 @@ Route::get('/salir', function (Request $request) {
 // LOGIN (redirige al modal, conservando mensajes de error)
 // ============================================================
 Route::get('/login', function () {
-    // Mantén los flashes (errors, old input, auth_error) para la siguiente request
     session()->reflash();
     return redirect('/?login=1');
 })->name('login');

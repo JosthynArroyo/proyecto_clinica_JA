@@ -1,3 +1,4 @@
+<!-- resources/views/layouts/admin.blade.php -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -5,13 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>@yield('title','Panel Administrativo - Clínica Los Ángeles')</title>
   <link rel="icon" type="image/jpg" href="{{ asset('img/LogoClinica.jpg') }}">
-  {{-- Iconos --}}
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Sharp" rel="stylesheet" />
-
-  {{-- URL para AJAX de KPIs (la leen los JS externos) --}}
   <meta name="dashboard-resumen-url" content="{{ route('admin.dashboard.resumen') }}">
-
   @vite(['resources/css/dashboards/admin.css', 'resources/js/dashboard-admin.js', 'resources/js/dashboard-admin-extras.js'])
   @stack('head')
 </head>
@@ -40,9 +37,14 @@
         <span class="material-symbols-outlined">person</span><h3>Usuarios</h3>
       </a>
 
+      <a href="{{ route('admin.usuarios.create') }}"
+         class="{{ request()->routeIs('admin.usuarios.create') ? 'active' : '' }}">
+        <span class="material-symbols-outlined">person_add</span><h3>Registrar Usuario</h3>
+      </a>
+
       <a href="{{ route('admin.doctores.crear') }}"
          class="{{ request()->routeIs('admin.doctores.*') ? 'active' : '' }}">
-        <span class="material-symbols-outlined">person_add</span><h3>Registrar Doctor</h3>
+        <span class="material-symbols-outlined">badge</span><h3>Registrar Doctor</h3>
       </a>
 
       <a href="{{ route('admin.pacientes.crear') }}"
@@ -50,7 +52,6 @@
         <span class="material-symbols-outlined">group_add</span><h3>Registrar Paciente</h3>
       </a>
 
-      {{-- NUEVO: Horarios --}}
       <a href="{{ route('admin.horarios.index') }}"
          class="{{ request()->routeIs('admin.horarios.*') ? 'active' : '' }}">
         <span class="material-symbols-outlined">schedule</span><h3>Horarios</h3>
