@@ -15,21 +15,19 @@ return new class extends Migration
             Schema::create('roles', function (Blueprint $table) {
                 $table->id();
                 $table->string('name')->unique();
-                $table->string('description')->nullable(); 
+                $table->string('description')->nullable();
                 $table->timestamps();
             });
         }
 
-        if (!Schema::hasTable('role_user')) {
-            Schema::create('role_user', function (Blueprint $table) {
-                $table->id();
-                $table->foreignId('user_id')->constrained()->onDelete('cascade'); 
-                $table->foreignId('role_id')->constrained()->onDelete('cascade');
-                $table->timestamps();
-                
-                $table->unique(['user_id', 'role_id']);
-            });
-        }
+        Schema::create('role_user', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('role_id')->constrained()->cascadeOnDelete();
+            $table->timestamps();
+
+            $table->unique(['user_id', 'role_id']);
+        });
     }
 
     /**

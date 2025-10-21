@@ -8,6 +8,7 @@ use App\Models\Cita;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use Carbon\Carbon;
 
 class AdminController extends Controller
 {
@@ -15,30 +16,23 @@ class AdminController extends Controller
     {
         $user = Auth::user();
 
-        $citas = Cita::where('paciente_id', $user->id)
-            ->orderBy('fecha', 'asc')
+        $citas = Cita::with(['doctor:id,name', 'especialidad:id,nombre'])
+            ->where('paciente_id', $user->id)
+            ->orderBy('fecha')
+            ->orderBy('hora')
             ->get();
 
-        $totalCitas = $citas->count();
-        $totalCitasPendientes = $citas->where('estado', 'pendiente')->count();
-        $totalCitasRealizadas = $citas->where('estado', 'realizada')->count();
-        $totalCitasCanceladas = $citas->where('estado', 'cancelada')->count();
+        $metrics = [
+            'total'      => $citas->count(),
+            'pendientes' => $citas->where('estado', 'pendiente')->count(),
+            'realizadas' => $citas->where('estado', 'realizada')->count(),
+            'canceladas' => $citas->where('estado', 'cancelada')->count(),
+        ];
 
-        $citasAgendadas2h = $citas->where('created_at', '>=', now()->subHours(2))->count();
-        $citasCompletadas2h = $citas->where('estado', 'realizada')->where('updated_at', '>=', now()->subHours(2))->count();
-        $citasCanceladas2h = $citas->where('estado', 'cancelada')->where('updated_at', '>=', now()->subHours(2))->count();
+        $today = Carbon::today();
+        $citasProximas = $citas->filter(fn ($cita) => $cita->fecha->greaterThanOrEqualTo($today))->take(10);
 
-        return view('paciente.dashboard', compact(
-            'user',
-            'citas',
-            'totalCitas',
-            'totalCitasPendientes',
-            'totalCitasRealizadas',
-            'totalCitasCanceladas',
-            'citasAgendadas2h',
-            'citasCompletadas2h',
-            'citasCanceladas2h'
-        ));
+        return view('dashboard.paciente', compact('user', 'metrics', 'citasProximas'));
     }
 
     public function editarPerfil()

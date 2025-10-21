@@ -18,10 +18,12 @@ class EnsureUserRole
             return redirect('/login');
         }
 
-        foreach ($roles as $role) {
-            if ($request->user()->roles->contains('name', $role)) {
-                return $next($request);
-            }
+        if ($request->user()->hasAnyRole(...$roles)) {
+            return $next($request);
+        }
+
+        if ($request->expectsJson()) {
+            return response()->json(['message' => 'Acceso denegado.'], 403);
         }
 
         return redirect('/')->with('error', 'Acceso denegado');

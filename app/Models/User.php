@@ -46,15 +46,57 @@ class User extends Authenticatable
         'suspended_until'    => 'datetime',
     ];
 
-    /** Roles */
+    /**
+     * === Gestión de Roles ===
+     */
     public function roles()
     {
-        return $this->belongsToMany(Role::class);
+        return $this->belongsToMany(Role::class)->withTimestamps();
+    }
+
+    public function scopeWithRole($query, string $roleName)
+    {
+        return $query->whereHas('roles', fn ($q) => $q->where('name', $roleName));
     }
 
     public function hasRole(string $roleName): bool
     {
         return $this->roles()->where('name', $roleName)->exists();
+    }
+
+    public function hasAnyRole(string ...$roles): bool
+    {
+        if (empty($roles)) {
+            return false;
+        }
+
+        return $this->roles()->whereIn('name', $roles)->exists();
+    }
+
+    public function hasAllRoles(string ...$roles): bool
+    {
+        if (empty($roles)) {
+            return false;
+        }
+
+        $count = $this->roles()->whereIn('name', $roles)->distinct()->count('roles.id');
+
+        return $count === count(array_unique($roles));
+    }
+
+    public function assignRole($roles): void
+    {
+        $roleIds = collect($roles)->map(function ($role) {
+            if ($role instanceof Role) {
+                return $role->id;
+            }
+
+            return Role::where('name', $role)->value('id');
+        })->filter()->all();
+
+        if (!empty($roleIds)) {
+            $this->roles()->syncWithoutDetaching($roleIds);
+        }
     }
 
     /** Especialidades (para doctores) */

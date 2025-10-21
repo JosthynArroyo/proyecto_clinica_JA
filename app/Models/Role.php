@@ -9,14 +9,17 @@ class Role extends Model
 {
     use HasFactory;
 
-    // Habilitamos la asignación masiva en el campo 'name'
-    protected $fillable = ['name'];
+    public const ADMINISTRADOR = 'administrador';
+    public const DOCTOR        = 'doctor';
+    public const PACIENTE      = 'paciente';
 
-    // Si tu tabla roles no usa created_at y updated_at, descomenta esta línea:
-    // public $timestamps = false;
+    protected $fillable = [
+        'name',
+        'description',
+    ];
 
     public function users()
     {
-        return $this->belongsToMany(User::class);
+        return $this->belongsToMany(User::class)->withTimestamps();
     }
 }
