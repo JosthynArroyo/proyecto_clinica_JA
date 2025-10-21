@@ -7,7 +7,8 @@
   <style>
     body{margin:0;background:#f5f7fb;font-family:Arial,Helvetica,sans-serif;color:#1f2937}
     .card{max-width:640px;margin:22px auto;background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden}
-    .header{padding:20px;background:#111827;color:#fff;text-align:center}
+    .header{padding:0;background:#111827;color:#fff;text-align:center}
+    .header img{display:block;width:100%;max-width:640px;height:auto}
     .body{padding:24px}
     .k{font-weight:700;color:#374151}
     .pill{display:inline-block;padding:6px 10px;border-radius:999px;font-weight:700;font-size:12px}
@@ -24,16 +25,16 @@
 </head>
 <body>
   <div class="card">
+    <!-- Cabecera con imagen -->
     <div class="header">
-      <strong>Clínica Don Bosco</strong>
-      <div style="margin-top:4px">{{ $asunto ?? 'Actualización de cita' }}</div>
+      <img src="{{ asset('img/img.jpg') }}" alt="Clínica Don Bosco">
     </div>
+
     <div class="body">
       @php
         $nombreReceptor = $rolReceptor === 'doctor' ? ($cita->doctor->name ?? 'Doctor/a') : ($cita->paciente->name ?? 'Paciente');
         $esAutor = ($rolReceptor === $quien);
 
-        // Texto del badge
         $textoEvento = [
           'agendada'  => 'agendada',
           'reagendada'=> 'reagendada',
@@ -41,7 +42,6 @@
           'aceptada'  => 'aceptada',
         ][$evento] ?? 'actualizada';
 
-        // Mensaje principal por rol / autor
         $mensaje = '';
 
         if ($evento === 'agendada') {
@@ -96,6 +96,7 @@
 
       <p class="muted" style="margin-top:10px;">Si no solicitaste este cambio, por favor comunícate con la clínica.</p>
     </div>
+
     <div class="footer">
       © {{ date('Y') }} Clínica Don Bosco · Este es un correo automático, no responder.
     </div>

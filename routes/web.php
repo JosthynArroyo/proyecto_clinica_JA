@@ -52,6 +52,10 @@ Route::get('/home', function () {
 Route::get('/contacto', [ContactoController::class, 'mostrarFormulario'])->name('contacto.form');
 Route::post('/contacto', [ContactoController::class, 'enviarFormulario'])->name('contacto.enviar');
 
+//  === Servicios
+Route::get('/servicios', fn() => view('servicios'))->name('servicios.index');
+
+
 // === Rutas firmadas por email
 Route::middleware('signed')->get('/email/cita/{cita}/{rol}/{accion}', EmailCitaActionController::class)
     ->where('rol', '^(paciente|doctor)$')

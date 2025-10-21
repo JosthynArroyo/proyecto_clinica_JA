@@ -31,9 +31,9 @@
          class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
         <span class="material-symbols-outlined">dashboard</span><h3>Inicio</h3>
       </a>
-
+      @php($isUsuariosSection = request()->routeIs('admin.usuarios.*') && !request()->routeIs('admin.usuarios.create'))
       <a href="{{ route('admin.usuarios.index') }}"
-         class="{{ request()->routeIs('admin.usuarios.*') ? 'active' : '' }}">
+         class="{{ $isUsuariosSection ? 'active' : '' }}">
         <span class="material-symbols-outlined">person</span><h3>Usuarios</h3>
       </a>
 
